@@ -16,8 +16,10 @@ defmodule SolverlviewWeb.Router do
 
   scope "/", SolverlviewWeb do
     pipe_through :browser
-
+    
     live "/", PageLive, :index
+
+    live("/sudoku", Sudoku)
   end
 
   # Other scopes may use custom stacks.

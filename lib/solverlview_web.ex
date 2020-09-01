@@ -24,6 +24,7 @@ defmodule SolverlviewWeb do
       import Plug.Conn
       import SolverlviewWeb.Gettext
       alias SolverlviewWeb.Router.Helpers, as: Routes
+      import Phoenix.LiveView.Controller
     end
   end
 
