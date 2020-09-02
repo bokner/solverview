@@ -33,7 +33,7 @@ defmodule Solverlview.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:solverl, ">=1.0.4"},
+      {:solverl, git: "https://github.com/bokner/solverl.git"},
       {:phoenix, "~> 1.5.4"},
       {:phoenix_live_view, "~> 0.13.0"},
       {:floki, ">= 0.0.0", only: :test},
