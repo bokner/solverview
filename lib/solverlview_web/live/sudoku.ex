@@ -8,6 +8,7 @@ defmodule SolverlviewWeb.Sudoku do
   @solved    3
   @not_solved 4
 
+  @time_limit 1000
   ######################
   ## LiveView API
   ######################
@@ -33,7 +34,7 @@ defmodule SolverlviewWeb.Sudoku do
 
   def handle_event("solve", data, socket) do
     Logger.debug "Data: #{inspect data}, Socket: #{inspect socket}"
-    puzzle = solve(data)
+    puzzle = solve(data, @time_limit)
     {:noreply, update(socket, :sudoku, fn _ -> puzzle end)}
   end
 
@@ -54,11 +55,12 @@ defmodule SolverlviewWeb.Sudoku do
 
     </style>
 
-    <div>
+
     <h1 style="text-align:center">Sudoku</h1>
-    <h2 style="text-align:center"># of solutions: <%= @total_solutions %></h2>
+    <h2 style="text-align:center"># of solutions: <%= @total_solutions %> (time limit: <%= @time_limit %> msecs)</h2>
+
     <form phx-submit="<%= action(@stage) %>" method="post">
-      <div class="sudoku" style="text-align:center">
+      <div class="sudoku" style="text-align:center;">
       <%= for i <- 0..8 do %>
         <div>
           <tr>
@@ -93,7 +95,7 @@ defmodule SolverlviewWeb.Sudoku do
   ######################
   ## Helpers (processing)
   ######################
-  defp solve(input) do
+  defp solve(input, time_limit) do
     puzzle = input_to_puzzle(input)
     my_pid = self()
     {:ok, _pid} = File.cd!(
@@ -101,6 +103,7 @@ defmodule SolverlviewWeb.Sudoku do
       fn ->
         Sudoku.solve(
           puzzle,
+          time_limit: time_limit,
           solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
         )
       end
@@ -143,6 +146,7 @@ defmodule SolverlviewWeb.Sudoku do
   end
 
   defp process_solver_event(:summary, summary, socket) do
+    Logger.debug "Done solving."
     stage = if MinizincResults.get_solution_count(summary) > 0, do: @solved, else: @not_solved
     socket
     |> update(:stage, fn _ -> stage end)
@@ -174,7 +178,8 @@ defmodule SolverlviewWeb.Sudoku do
       [
         total_solutions: 0,
         sudoku: empty_sudoku(),
-        stage: @start_new
+        stage: @start_new,
+        time_limit: @time_limit
       ]
     )
   end
