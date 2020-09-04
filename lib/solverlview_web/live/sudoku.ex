@@ -16,7 +16,6 @@ defmodule SolverlviewWeb.Sudoku do
   end
 
   def handle_info({:solver_event, event, data}, socket) do
-    #Process.sleep(1000)
     {:noreply, process_solver_event(event, data, socket)}
   end
 
@@ -38,21 +37,23 @@ defmodule SolverlviewWeb.Sudoku do
   def render(assigns) do
     ~L"""
     <div>
-    <h1># of solutions: <%= @total_solutions %></h1>
+    <h1 style="text-align:center">Sudoku</h1>
+    <h2 style="text-align:center"># of solutions: <%= @total_solutions %></h2>
     <form phx-submit="<%= action(@stage) %>" method="post">
-      <div class="sudoku">
+      <div class="sudoku" style="text-align:center">
       <%= for i <- 0..8 do %>
         <div>
           <tr>
           <%= for j <- 0..8 do %>
-            <input maxlength="1" size="1" name="input[<%= i %>][<%= j %>]" value="<%= Enum.at(Enum.at(@sudoku, i), j) %>"
+            <input style="border-style: solid" maxlength="1" size="1" name="input[<%= i %>][<%= j %>]" value="<%= Enum.at(Enum.at(@sudoku, i), j) %>"
               />
           <% end %>
           </tr>
         </div>
       <% end %>
-      </div>
       <button <%= if @stage == 2, do: "disabled" %>><%= button_name(@stage) %></button>
+      </div>
+
     </form>
     </div>
     """
