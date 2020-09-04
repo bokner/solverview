@@ -33,7 +33,6 @@ defmodule SolverlviewWeb.Sudoku do
   end
 
   def handle_event("solve", data, socket) do
-    Logger.debug "Data: #{inspect data}, Socket: #{inspect socket}"
     puzzle = solve(data, @time_limit)
     {:noreply, update(socket, :sudoku, fn _ -> puzzle end)}
   end
@@ -146,8 +145,9 @@ defmodule SolverlviewWeb.Sudoku do
   end
 
   defp process_solver_event(:summary, summary, socket) do
-    Logger.debug "Done solving."
-    stage = if MinizincResults.get_solution_count(summary) > 0, do: @solved, else: @not_solved
+    solution_count = MinizincResults.get_solution_count(summary)
+    Logger.debug "Done, found #{solution_count} solution(s)"
+    stage = if solution_count > 0, do: @solved, else: @not_solved
     socket
     |> update(:stage, fn _ -> stage end)
   end
@@ -196,11 +196,11 @@ defmodule SolverlviewWeb.Sudoku do
   end
 
   defp button_name(@solved) do
-    "Solved! Try next one..."
+    "Solved! Try another one..."
   end
 
   defp button_name(@not_solved) do
-    "No solutions. Try next one..."
+    "No solutions. Try another one..."
   end
 
 
