@@ -8,6 +8,10 @@ defmodule SolverlviewWeb.Sudoku do
   @solved    3
   @not_solved 4
 
+  ######################
+  ## LiveView API
+  ######################
+
   def mount(_params, _session, socket) do
     {
       :ok,
@@ -29,13 +33,27 @@ defmodule SolverlviewWeb.Sudoku do
 
   def handle_event("solve", data, socket) do
     Logger.debug "Data: #{inspect data}, Socket: #{inspect socket}"
-    solve(data)
-    {:noreply, socket}
+    puzzle = solve(data)
+    {:noreply, update(socket, :sudoku, fn _ -> puzzle end)}
   end
 
 
   def render(assigns) do
     ~L"""
+
+    <style>
+    textarea:focus, input:focus {
+    color: #ff0000;
+    }
+
+    input, select, textarea{
+    color: #000;
+    }
+
+
+
+    </style>
+
     <div>
     <h1 style="text-align:center">Sudoku</h1>
     <h2 style="text-align:center"># of solutions: <%= @total_solutions %></h2>
@@ -45,13 +63,25 @@ defmodule SolverlviewWeb.Sudoku do
         <div>
           <tr>
           <%= for j <- 0..8 do %>
-            <input style="border-style: solid" maxlength="1" size="1" name="input[<%= i %>][<%= j %>]" value="<%= Enum.at(Enum.at(@sudoku, i), j) %>"
+            <td>
+            <input style="background: <%= cell_background(i, j) %>;
+                  width: 30px;
+                  height: 30px;
+                  color: black;
+                  border: 2px solid;
+                  font-size: 20px;
+                  font-weight: bold;
+                  text-align: center;"
+                    maxlength="1" size="1"
+                    <%= if disable_input?(@stage), do: "disabled" %>
+                    name="input[<%= i %>][<%= j %>]" value="<%= cell_value(@sudoku, i, j) %>"
               />
+            </td>
           <% end %>
           </tr>
         </div>
       <% end %>
-      <button <%= if @stage == 2, do: "disabled" %>><%= button_name(@stage) %></button>
+      <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
       </div>
 
     </form>
@@ -60,6 +90,9 @@ defmodule SolverlviewWeb.Sudoku do
   end
 
 
+  ######################
+  ## Helpers (processing)
+  ######################
   defp solve(input) do
     puzzle = input_to_puzzle(input)
     my_pid = self()
@@ -72,7 +105,7 @@ defmodule SolverlviewWeb.Sudoku do
         )
       end
     )
-
+    puzzle
   end
 
   defp input_to_puzzle(data) do
@@ -119,22 +152,6 @@ defmodule SolverlviewWeb.Sudoku do
     socket
   end
 
-  defp button_name(@start_new) do
-    "Start"
-  end
-
-  defp button_name(@solving) do
-    "Solving..."
-  end
-
-  defp button_name(@solved) do
-    "Solved! Try next one..."
-  end
-
-  defp button_name(@not_solved) do
-    "No solutions. Try next one..."
-  end
-
   defp action(@start_new) do
     "solve"
   end
@@ -161,5 +178,56 @@ defmodule SolverlviewWeb.Sudoku do
       ]
     )
   end
+
+  ######################
+  ## Helpers (rendering)
+  ######################
+  defp button_name(@start_new) do
+    "Solve"
+  end
+
+  defp button_name(@solving) do
+    "Solving..."
+  end
+
+  defp button_name(@solved) do
+    "Solved! Try next one..."
+  end
+
+  defp button_name(@not_solved) do
+    "No solutions. Try next one..."
+  end
+
+
+  defp disable_input?(@start_new) do
+    false
+  end
+
+  defp disable_input?(_other) do
+    true
+  end
+
+  defp cell_value(sudoku, row, col) do
+    case Enum.at(Enum.at(sudoku, row), col) do
+      0 -> ""
+      v -> v
+    end
+  end
+
+  @grey_cell_color "#E8E8E8"
+  @white_cell_color "white"
+
+  defp cell_background(i, j) when i in [3,4,5] and j in [3,4,5] do
+    @white_cell_color
+  end
+
+  defp cell_background(i, j) when i in [3,4,5] or j in [3,4,5]  do
+    @grey_cell_color
+  end
+
+  defp cell_background(_i, _j) do
+    @white_cell_color
+  end
+
 
 end
