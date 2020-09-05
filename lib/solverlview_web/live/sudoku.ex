@@ -36,7 +36,7 @@ defmodule SolverlviewWeb.Sudoku do
     puzzle = solve(data, @time_limit)
     {:noreply,
       socket
-      |> update(:sudoku, fn _ -> puzzle end)
+      |> update(:solved_puzzle, fn _ -> puzzle end)
       |> update(:puzzle, fn _ -> puzzle end)
     }
   end
@@ -67,14 +67,14 @@ defmodule SolverlviewWeb.Sudoku do
             <input style="background: <%= cell_background(i, j) %>;
                   width: 30px;
                   height: 30px;
-                  color: <%= if cell_value(@sudoku, i, j) == cell_value(@puzzle, i, j), do: "black", else: "blue" %>;
+                  color: <%= if cell_value(@solved_puzzle, i, j) == cell_value(@puzzle, i, j), do: "black", else: "blue" %>;
                   border: 2px solid;
                   font-size: 20px;
                   font-weight: bold;
                   text-align: center;"
                     maxlength="1" size="1"
                     <%= if disable_input?(@stage), do: "disabled" %>
-                    name="input[<%= i %>][<%= j %>]" value="<%= cell_value(@sudoku, i, j) %>"
+                    name="input[<%= i %>][<%= j %>]" value="<%= cell_value(@solved_puzzle, i, j) %>"
               />
             </td>
           <% end %>
@@ -136,7 +136,7 @@ defmodule SolverlviewWeb.Sudoku do
       "puzzle"
     )
     socket
-    |> update(:sudoku, fn _ -> solved_puzzle end)
+    |> update(:solved_puzzle, fn _ -> solved_puzzle end)
     |> update(:total_solutions, &(&1 + 1))
     |> update(:stage, fn _ -> @solving end)
   end
@@ -176,7 +176,7 @@ defmodule SolverlviewWeb.Sudoku do
       [
         total_solutions: 0,
         puzzle: empty,
-        sudoku: empty,
+        solved_puzzle: empty,
         stage: @start_new,
         time_limit: @time_limit
       ]
