@@ -10,6 +10,7 @@ defmodule Solverlview.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      docs: docs(),
       deps: deps()
     ]
   end
@@ -44,9 +45,32 @@ defmodule Solverlview.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
+
+
+
+
+
+  defp copy_doc_assets(_) do
+    File.cp_r("doc_assets/readme", "doc", fn _source, _destination ->
+      true
+    end)
+    File.cp("README.md", "doc")
+  end
+
+  defp docs() do
+    [
+      main: "readme",
+      formatter_opts: [gfm: true],
+      extras: [
+        "README.md",
+      ]
+    ]
+  end
+
 
   # Aliases are shortcuts or tasks specific to the current project.
   # For example, to install project dependencies and perform other setup tasks, run:
@@ -55,7 +79,7 @@ defmodule Solverlview.MixProject do
   #
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
-    [
+    [docs: ["docs", &copy_doc_assets/1],
       setup: ["deps.get", "cmd npm install --prefix assets"]
     ]
   end

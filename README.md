@@ -4,7 +4,7 @@
 
 ## Installation
 
- - Install Minizinc 2.4.3. Please refer to https://www.minizinc.org/software.html for details. 
+ - Install MiniZinc 2.4.3. Please refer to https://www.minizinc.org/software.html for details. 
  - Install Phoenix Framework. Please refer to https://hexdocs.pm/phoenix/installation.html for details.
  - Run `mix setup` 
  
@@ -12,10 +12,15 @@
 
 Start the Phoenix server by running one of:
 
-`mix phx.server` or  `iex -S mix phx.server`
+```mix phx.server``` or  ```iex -S mix phx.server```
 
-Now you can visit localhost:4000/<example> in your web browser.
+Now you can visit localhost:4000/`<example>` in your web browser.
  
 ## The list of available examples:
 
 - Sudoku: http://localhost:4000/sudoku 
+
+
+![](sudoku_screen1.png)
+
+![](sudoku_screen2.png)
