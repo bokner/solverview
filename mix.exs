@@ -55,7 +55,8 @@ defmodule Solverlview.MixProject do
 
 
   defp copy_doc_assets(_) do
-    File.cp_r("doc_assets/readme", "doc", fn _source, _destination ->
+    File.mkdir_p("doc/doc_assets/readme")
+    File.cp_r("doc_assets/readme", "doc/doc_assets/readme", fn _source, _destination ->
       true
     end)
     File.cp("README.md", "doc")
