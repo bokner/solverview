@@ -34,10 +34,12 @@ defmodule SolverlviewWeb.Sudoku do
 
   def handle_event("solve", data, socket) do
     puzzle = solve(data, @time_limit)
-    {:noreply,
+    {
+      :noreply,
       socket
       |> update(:solved_puzzle, fn _ -> puzzle end)
       |> update(:puzzle, fn _ -> puzzle end)
+      |> update(:start_ts, fn _ -> DateTime.utc_now() end)
     }
   end
 
@@ -56,6 +58,12 @@ defmodule SolverlviewWeb.Sudoku do
 
     <h1 style="text-align:center">Sudoku</h1>
     <h2 style="text-align:center"># of solutions: <%= @total_solutions %> (time limit: <%= @time_limit %> msecs)</h2>
+
+      <h2 style="text-align:center">
+      <%= if @first_solution_ts > 0 do
+        "1st solution found in #{DateTime.diff(@first_solution_ts, @start_ts, :millisecond)} msecs"
+      end %>
+      </h2>
 
     <form phx-submit="<%= action(@stage) %>" method="post">
       <div class="sudoku" style="text-align:center;">
@@ -139,6 +147,13 @@ defmodule SolverlviewWeb.Sudoku do
     |> update(:solved_puzzle, fn _ -> solved_puzzle end)
     |> update(:total_solutions, &(&1 + 1))
     |> update(:stage, fn _ -> @solving end)
+    |> update(
+         :first_solution_ts,
+         fn
+           0 -> DateTime.utc_now()
+           ts -> ts
+         end
+       )
   end
 
   defp process_solver_event(:summary, summary, socket) do
@@ -175,6 +190,8 @@ defmodule SolverlviewWeb.Sudoku do
       socket,
       [
         total_solutions: 0,
+        start_ts: 0,
+        first_solution_ts: 0,
         puzzle: empty,
         solved_puzzle: empty,
         stage: @start_new,
@@ -221,11 +238,11 @@ defmodule SolverlviewWeb.Sudoku do
   @grey_cell_color "#E8E8E8"
   @white_cell_color "white"
 
-  defp cell_background(i, j) when i in [3,4,5] and j in [3,4,5] do
+  defp cell_background(i, j) when i in [3, 4, 5] and j in [3, 4, 5] do
     @white_cell_color
   end
 
-  defp cell_background(i, j) when i in [3,4,5] or j in [3,4,5]  do
+  defp cell_background(i, j) when i in [3, 4, 5] or j in [3, 4, 5]  do
     @grey_cell_color
   end
 
