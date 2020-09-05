@@ -34,13 +34,16 @@ defmodule SolverlviewWeb.Sudoku do
 
   def handle_event("solve", data, socket) do
     puzzle = solve(data, @time_limit)
-    {:noreply, update(socket, :sudoku, fn _ -> puzzle end)}
+    {:noreply,
+      socket
+      |> update(:sudoku, fn _ -> puzzle end)
+      |> update(:puzzle, fn _ -> puzzle end)
+    }
   end
 
 
   def render(assigns) do
     ~L"""
-
     <style>
     textarea:focus, input:focus {
     color: #ff0000;
@@ -49,11 +52,7 @@ defmodule SolverlviewWeb.Sudoku do
     input, select, textarea{
     color: #000;
     }
-
-
-
     </style>
-
 
     <h1 style="text-align:center">Sudoku</h1>
     <h2 style="text-align:center"># of solutions: <%= @total_solutions %> (time limit: <%= @time_limit %> msecs)</h2>
@@ -68,7 +67,7 @@ defmodule SolverlviewWeb.Sudoku do
             <input style="background: <%= cell_background(i, j) %>;
                   width: 30px;
                   height: 30px;
-                  color: black;
+                  color: <%= if cell_value(@sudoku, i, j) == cell_value(@puzzle, i, j), do: "black", else: "blue" %>;
                   border: 2px solid;
                   font-size: 20px;
                   font-weight: bold;
@@ -84,9 +83,7 @@ defmodule SolverlviewWeb.Sudoku do
       <% end %>
       <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
       </div>
-
     </form>
-    </div>
     """
   end
 
@@ -173,11 +170,13 @@ defmodule SolverlviewWeb.Sudoku do
   end
 
   defp new_puzzle(socket) do
+    empty = empty_sudoku()
     assign(
       socket,
       [
         total_solutions: 0,
-        sudoku: empty_sudoku(),
+        puzzle: empty,
+        sudoku: empty,
         stage: @start_new,
         time_limit: @time_limit
       ]
