@@ -4,11 +4,10 @@
 
 ## Installation
 
--Install Minizinc 2.4.3. Please refer to https://www.minizinc.org/software.html for details. 
--Install Phoenix Framework. Please refer to https://hexdocs.pm/phoenix/installation.html for details.
-
-Run 'mix setup' to finish installation.
-
+ - Install Minizinc 2.4.3. Please refer to https://www.minizinc.org/software.html for details. 
+ - Install Phoenix Framework. Please refer to https://hexdocs.pm/phoenix/installation.html for details.
+ - Run `mix setup` 
+ 
 ## Running examples
 
 Start the Phoenix server by running one of:
