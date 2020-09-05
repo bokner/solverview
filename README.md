@@ -20,7 +20,5 @@ Now you can visit localhost:4000/`<example>` in your web browser.
 
 - Sudoku: http://localhost:4000/sudoku 
 
-
-![](sudoku_screen1.png)
-
-![](sudoku_screen2.png)
+![](./doc_assets/readme/sudoku_screen1.png)
+![](./doc_assets/readme/sudoku_screen2.png)
