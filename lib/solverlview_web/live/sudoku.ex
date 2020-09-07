@@ -59,11 +59,22 @@ defmodule SolverlviewWeb.Sudoku do
     <h1 style="text-align:center">Sudoku</h1>
     <h2 style="text-align:center"># of solutions: <%= @total_solutions %> (time limit: <%= @time_limit %> msecs)</h2>
 
+
+
       <h2 style="text-align:center">
-      <%= if @first_solution_ts > 0 do
-        "1st solution found in #{DateTime.diff(@first_solution_ts, @start_ts, :millisecond)} msecs"
-      end %>
+        <%= if @compilation_ts > 0 do
+          "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
+        end %>
       </h2>
+
+
+      <h2 style="text-align:center">
+        <%= if @first_solution_ts > 0 do
+          "1st solution found in #{DateTime.diff(@first_solution_ts, @start_ts, :millisecond)} msecs"
+        end %>
+      </h2>
+
+
 
     <form phx-submit="<%= action(@stage) %>" method="post">
       <div class="sudoku" style="text-align:center;">
@@ -164,6 +175,12 @@ defmodule SolverlviewWeb.Sudoku do
     |> update(:stage, fn _ -> stage end)
   end
 
+  defp process_solver_event(:compiled, %{compilation_timestamp: ts} = compilation_info, socket) do
+    Logger.debug "Compiled...#{inspect compilation_info}"
+    assign(socket,
+      [compilation_ts: ts])
+  end
+
   defp process_solver_event(_event, _data, socket) do
     socket
   end
@@ -191,6 +208,7 @@ defmodule SolverlviewWeb.Sudoku do
       [
         total_solutions: 0,
         start_ts: 0,
+        compilation_ts: 0,
         first_solution_ts: 0,
         puzzle: empty,
         solved_puzzle: empty,
