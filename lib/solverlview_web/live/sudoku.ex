@@ -54,30 +54,58 @@ defmodule SolverlviewWeb.Sudoku do
     input, select, textarea{
     color: #000;
     }
+
+
+    .container {
+    width: 100%;
+
+    margin: auto;
+    padding: 10px;
+    }
+
+    .sudoku {
+    width: 50%;
+    float: left;
+    }
+
+    .minizinc {
+    background: aqua;
+    width: 50%;
+    float: right;
+    }
+
     </style>
 
+
     <h1 style="text-align:center">Sudoku</h1>
-    <h2 style="text-align:center"># of solutions: <%= @total_solutions %> (time limit: <%= @time_limit %> msecs)</h2>
 
-
-
-      <h2 style="text-align:center">
+    <section class="container">
+    <div class="minizinc">
+      <h2 style="text-align:center">Minizinc stats</h1>
+      <h3 style="text-align:center">
         <%= if @compilation_ts > 0 do
           "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
         end %>
-      </h2>
+      </h3>
 
 
-      <h2 style="text-align:center">
+      <h3 style="text-align:center">
         <%= if @first_solution_ts > 0 do
-          "1st solution found in #{DateTime.diff(@first_solution_ts, @start_ts, :millisecond)} msecs"
+          "1st solution found in #{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)} msecs"
         end %>
-      </h2>
+      </h3>
 
+      <h3 style="text-align:center">
+        <%= if @first_solution_ts > 0 do
+          "# of solutions: #{@total_solutions} (time limit: #{@time_limit} msecs)"
+        end %>
+      </h3>
 
+      </div>
 
+    <div class="sudoku">
     <form phx-submit="<%= action(@stage) %>" method="post">
-      <div class="sudoku" style="text-align:center;">
+      <div style="text-align:center;">
       <%= for i <- 0..8 do %>
         <div>
           <tr>
@@ -103,6 +131,7 @@ defmodule SolverlviewWeb.Sudoku do
       <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
       </div>
     </form>
+    </div>
     """
   end
 
