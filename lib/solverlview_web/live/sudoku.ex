@@ -56,22 +56,34 @@ defmodule SolverlviewWeb.Sudoku do
     }
 
 
-    .container {
+    .container2 {
     width: 100%;
 
     margin: auto;
     padding: 10px;
     }
 
-    .sudoku {
+    .sudoku2 {
     width: 50%;
     float: left;
     }
 
-    .minizinc {
+    .minizinc2 {
     background: aqua;
     width: 50%;
     float: right;
+    }
+
+    #container {
+    display: flex;
+    }
+
+    #sudoku {
+    flex: 0 0 30%;
+    }
+
+    #minizinc {
+    flex: 1;
     }
 
     </style>
@@ -79,31 +91,9 @@ defmodule SolverlviewWeb.Sudoku do
 
     <h1 style="text-align:center">Sudoku</h1>
 
-    <section class="container">
-    <div class="minizinc">
-      <h2 style="text-align:center">Minizinc stats</h1>
-      <h3 style="text-align:center">
-        <%= if @compilation_ts > 0 do
-          "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
-        end %>
-      </h3>
+    <div id="container">
 
-
-      <h3 style="text-align:center">
-        <%= if @first_solution_ts > 0 do
-          "1st solution found in #{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)} msecs"
-        end %>
-      </h3>
-
-      <h3 style="text-align:center">
-        <%= if @first_solution_ts > 0 do
-          "# of solutions: #{@total_solutions} (time limit: #{@time_limit} msecs)"
-        end %>
-      </h3>
-
-      </div>
-
-    <div class="sudoku">
+    <div id="sudoku">
     <form phx-submit="<%= action(@stage) %>" method="post">
       <div style="text-align:center;">
       <%= for i <- 0..8 do %>
@@ -131,6 +121,36 @@ defmodule SolverlviewWeb.Sudoku do
       <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
       </div>
     </form>
+    </div>
+
+    <div id="minizinc">
+
+      <%= if @stage > 1 do %>
+       <h2> Minizinc stats</h2>
+      <% end %>
+
+      <h3 >
+        <%= if @compilation_ts > 0 do
+          "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
+        end %>
+      </h3>
+
+
+      <h3 >
+        <%= if @first_solution_ts > 0 do
+          "1st solution found in #{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)} msecs"
+        end %>
+      </h3>
+
+      <h3 >
+        <%= if @first_solution_ts > 0 do
+          "# of solutions: #{@total_solutions} (time limit: #{@time_limit} msecs)"
+        end %>
+      </h3>
+
+    </div>
+
+
     </div>
     """
   end
