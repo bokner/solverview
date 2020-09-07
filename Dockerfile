@@ -1,8 +1,7 @@
-# The version of Alpine to use for the final image
-# This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
-ARG ALPINE_VERSION=3.8
+# The version of Ubuntu to use for the final image
+ARG UBUNTU_VERSION=20.04
 
-FROM elixir:1.7.2-alpine AS builder
+FROM elixir:latest AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -27,13 +26,12 @@ ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
 WORKDIR /opt/app
 
 # This step installs all the build tools we'll need
-RUN apk update && \
-  apk upgrade --no-cache && \
-  apk add --no-cache \
+RUN apt-get update -y && \
+  apt-get upgrade  -y && \
+  apt-get install -y \
     nodejs \
-    yarn \
     git \
-    build-base && \
+    build-essential && \
   mix local.rebar --force && \
   mix local.hex --force
 
@@ -47,8 +45,6 @@ RUN mix do deps.get, deps.compile, compile
 # This is mostly here for demonstration purposes
 RUN if [ ! "$SKIP_PHOENIX" = "true" ]; then \
   cd ${PHOENIX_SUBDIR}/assets && \
-  yarn install && \
-  yarn deploy && \
   cd - && \
   mix phx.digest; \
 fi
@@ -62,15 +58,16 @@ RUN \
   rm ${APP_NAME}.tar.gz
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM alpine:${ALPINE_VERSION}
+FROM ubuntu:${UBUNTU_VERSION}
 
 # The name of your application/release (required)
 ARG APP_NAME
 
-RUN apk update && \
-    apk add --no-cache \
+RUN apt-get update && \
+    apt-get install -y \
       bash \
-      openssl-dev
+      libssl-dev \
+      libtinfo-dev
 
 ENV REPLACE_OS_VARS=true \
     APP_NAME=${APP_NAME}

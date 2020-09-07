@@ -1,11 +1,12 @@
 .PHONY: help
 
-APP_NAME ?= solverlview
-APP_VSN ?= 1.0.5
-BUILD ?= $(APP_VSN)
+APP_NAME ?= `grep 'app:' mix.exs | sed -e 's/\[//g' -e 's/ //g' -e 's/app://' -e 's/[:,]//g'`
+APP_VSN ?= `grep 'version:' mix.exs | cut -d '"' -f2`
+BUILD ?= `git rev-parse --short HEAD`
+
 
 build: ## Build the Docker image
-	docker build --build-arg APP_NAME=$(APP_NAME) \
+	docker build --no-cache --build-arg APP_NAME=$(APP_NAME) \
 		--build-arg APP_VSN=$(APP_VSN) \
 		-t $(APP_NAME):$(APP_VSN)-$(BUILD) \
 		-t $(APP_NAME):latest .
