@@ -4,7 +4,6 @@ APP_NAME ?= solverlview
 APP_VSN ?= 1.0.5
 BUILD ?= $(APP_VSN)
 
-
 build: ## Build the Docker image
 	docker build --build-arg APP_NAME=$(APP_NAME) \
 		--build-arg APP_VSN=$(APP_VSN) \
