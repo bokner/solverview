@@ -11,8 +11,9 @@ use Mix.Config
 # before starting your production server.
 config :solverlview, SolverlviewWeb.Endpoint,
   http: [:inet6, port: System.get_env("PORT") || 4000],
-  url: [host: "localhost", port: System.get_env("PORT")], 
+  url: [host: "*", port: System.get_env("PORT")], 
   cache_static_manifest: "priv/static/cache_manifest.json",
+  check_origin: false,
   server: true,
   root: ".",
   version: Application.spec(:phoenix_distillery, :vsn)
