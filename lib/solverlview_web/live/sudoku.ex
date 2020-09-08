@@ -79,11 +79,25 @@ defmodule SolverlviewWeb.Sudoku do
     }
 
     #sudoku {
-    flex: 0 0 30%;
+    border: solid;
+    padding-top: 2em;
+    flex: 0 0 60%;
     }
 
     #minizinc {
+    padding-top: 2em;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 2em;
+    border: solid;
     flex: 1;
+    }
+
+    .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
     }
 
     </style>
@@ -125,11 +139,11 @@ defmodule SolverlviewWeb.Sudoku do
 
     <div id="minizinc">
 
-      <%= if @stage > 1 do %>
-       <h2> Minizinc stats</h2>
-      <% end %>
+       <div border="1px solid #ddd">
+          <img  src="/images/minizinc.png"  class="center" alt="MiniZinc Logo"/>
+        </div>
 
-      <h3 >
+      <h3>
         <%= if @compilation_ts > 0 do
           "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
         end %>
