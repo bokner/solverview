@@ -32,15 +32,15 @@
 
     #sudoku {
     border: solid;
-    padding-top: 2em;
-    flex: 0 0 60%;
+    padding-top: 0.5em;
+    flex: 0 0 50%;
     }
 
     #minizinc {
-    padding-top: 2em;
-    padding-left: 1em;
-    padding-right: 1em;
-    padding-bottom: 2em;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-bottom: 0.5em;
     border: solid;
     flex: 1;
     }
@@ -53,20 +53,28 @@
     }
 
     .top_right img {
-     top: 0px;
-    right: 0px;
-    float:right;
+     margin: auto;
+     right: 2em;
+     /*display: inline-block;*/
+     float:right;
     }
 
     </style>
 
 
-    <h1 style="text-align:center">Sudoku</h1>
+
 
     <div id="container">
 
     <div id="sudoku">
+
+
     <form phx-submit="<%= action(@stage) %>" method="post">
+        <div >
+            <img  src="/images/poweredby-phoenix-badge2-05.png" class="" alt="Phoenix Logo"/>
+            <span><h2 style="text-align: center;">Sudoku</h2></span>
+        </div>
+
       <div style="text-align:center;">
       <%= for i <- 0..8 do %>
         <div>
@@ -97,8 +105,8 @@
 
     <div id="minizinc">
 
-       <div border="1px solid #ddd" class="top_right">
-          <img  src="/images/minizinc.png"   alt="MiniZinc Logo"/>
+       <div >
+          <img  src="/images/minizinc.png" class=""  alt="MiniZinc Logo"/>
         </div>
 
       <h3>
