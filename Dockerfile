@@ -1,79 +1,43 @@
-# The version of Ubuntu to use for the final image
-ARG UBUNTU_VERSION=20.04
+FROM elixir:1.10
 
-FROM elixir:latest AS builder
+RUN apt-get update
+RUN apt-get install --yes build-essential inotify-tools
 
-# The following are build arguments used to change variable parts of the image.
-# The name of your application/release (required)
-ARG APP_NAME
-# The version of the application we are building (required)
-ARG APP_VSN
-# The environment to build with
-ARG MIX_ENV=prod
-# Set this to true if this release is not a Phoenix app
-ARG SKIP_PHOENIX=false
-# If you are using an umbrella project, you can change this
-# argument to the directory the Phoenix app is in so that the assets
-# can be built
-ARG PHOENIX_SUBDIR=.
+# Set working directory
+RUN mkdir -p /app
+WORKDIR /app
 
-ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
-    APP_NAME=${APP_NAME} \
-    APP_VSN=${APP_VSN} \
-    MIX_ENV=${MIX_ENV}
-
-# By convention, /opt is typically used for applications
-WORKDIR /opt/app
-
-# This step installs all the build tools we'll need
-RUN apt-get update -y && \
-  apt-get upgrade  -y && \
-  apt-get install -y \
-    nodejs \
-    git \
-    build-essential && \
+# Install hex, rebar, and phx_new
+RUN mix local.hex --force && \
   mix local.rebar --force && \
-  mix local.hex --force
+  mix archive.install --force hex phx_new
 
-# This copies our app source code into the build container
-COPY . .
+# Copy and install the elixir deps
+COPY mix.exs .
+COPY mix.lock .
+RUN mix deps.get && mix deps.compile
 
-RUN mix do deps.get, deps.compile, compile
+# Install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - &&\
+      apt-get install --yes nodejs
 
-# This step builds assets for the Phoenix app (if there is one)
-# If you aren't building a Phoenix app, pass `--build-arg SKIP_PHOENIX=true`
-# This is mostly here for demonstration purposes
-RUN if [ ! "$SKIP_PHOENIX" = "true" ]; then \
-  cd ${PHOENIX_SUBDIR}/assets && \
-  cd - && \
-  mix phx.digest; \
-fi
+# Copy and install the nodejs deps
+COPY assets ./assets
+WORKDIR /app/assets
+RUN npm install
+WORKDIR /app
 
-RUN \
-  mkdir -p /opt/built && \
-  mix distillery.release --verbose && \
-  cp _build/${MIX_ENV}/rel/${APP_NAME}/releases/${APP_VSN}/${APP_NAME}.tar.gz /opt/built && \
-  cd /opt/built && \
-  tar -xzf ${APP_NAME}.tar.gz && \
-  rm ${APP_NAME}.tar.gz
+# Copy over compiled files
+COPY config ./config
+COPY lib ./lib
+COPY priv ./priv
+COPY test ./test
 
-# From this line onwards, we're in a new image, which will be the image used in production
-FROM ubuntu:${UBUNTU_VERSION}
+# Compile the app
+RUN mix compile
 
-# The name of your application/release (required)
-ARG APP_NAME
+# Compile deps in test environment for faster test runs when built
+RUN MIX_ENV=test mix deps.compile
 
-RUN apt-get update && \
-    apt-get install -y \
-      bash \
-      libssl-dev \
-      libtinfo-dev
-
-ENV REPLACE_OS_VARS=true \
-    APP_NAME=${APP_NAME}
-
-WORKDIR /opt/app
-
-COPY --from=builder /opt/built .
-
-CMD trap 'exit' INT; /opt/app/bin/${APP_NAME} foreground
+# Set the run command
+CMD ["mix", "phx.server"]

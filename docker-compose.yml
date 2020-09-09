@@ -1,0 +1,14 @@
+version: "3"
+services:
+  app:
+    build: .
+    ports:
+      - "4000:4000"
+    volumes:
+      - /app/assets/node_modules
+      - ./assets:/app/assets
+      - ./config:/app/config
+      - ./lib:/app/lib
+      - ./priv:/app/priv
+      - ./test:/app/test
+      - ./mix.exs:/app/mix.exs
