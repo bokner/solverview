@@ -1,0 +1,127 @@
+    <style>
+    textarea:focus, input:focus {
+    color: #ff0000;
+    }
+
+    input, select, textarea{
+    color: #000;
+    }
+
+
+    .container2 {
+    width: 100%;
+
+    margin: auto;
+    padding: 10px;
+    }
+
+    .sudoku2 {
+    width: 50%;
+    float: left;
+    }
+
+    .minizinc2 {
+    background: aqua;
+    width: 50%;
+    float: right;
+    }
+
+    #container {
+    display: flex;
+    }
+
+    #sudoku {
+    border: solid;
+    padding-top: 2em;
+    flex: 0 0 60%;
+    }
+
+    #minizinc {
+    padding-top: 2em;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-bottom: 2em;
+    border: solid;
+    flex: 1;
+    }
+
+    .center {
+
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    }
+
+    .top_right img {
+     top: 0px;
+    right: 0px;
+    float:right;
+    }
+
+    </style>
+
+
+    <h1 style="text-align:center">Sudoku</h1>
+
+    <div id="container">
+
+    <div id="sudoku">
+    <form phx-submit="<%= action(@stage) %>" method="post">
+      <div style="text-align:center;">
+      <%= for i <- 0..8 do %>
+        <div>
+          <tr>
+          <%= for j <- 0..8 do %>
+            <td>
+            <input style="background: <%= cell_background(i, j) %>;
+                  width: 30px;
+                  height: 30px;
+                  color: <%= if cell_value(@solved_puzzle, i, j) == cell_value(@puzzle, i, j), do: "black", else: "blue" %>;
+                  border: 2px solid;
+                  font-size: 20px;
+                  font-weight: bold;
+                  text-align: center;"
+                    maxlength="1" size="1"
+                    <%= if disable_input?(@stage), do: "disabled" %>
+                    name="input[<%= i %>][<%= j %>]" value="<%= cell_value(@solved_puzzle, i, j) %>"
+              />
+            </td>
+          <% end %>
+          </tr>
+        </div>
+      <% end %>
+      <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
+      </div>
+    </form>
+    </div>
+
+    <div id="minizinc">
+
+       <div border="1px solid #ddd" class="top_right">
+          <img  src="/images/minizinc.png"   alt="MiniZinc Logo"/>
+        </div>
+
+      <h3>
+        <%= if @compilation_ts > 0 do
+          "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
+        end %>
+      </h3>
+
+
+      <h3 >
+        <%= if @first_solution_ts > 0 do
+          "1st solution found in #{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)} msecs"
+        end %>
+      </h3>
+
+      <h3 >
+        <%= if @first_solution_ts > 0 do
+          "# of solutions: #{@total_solutions} (time limit: #{@time_limit} msecs)"
+        end %>
+      </h3>
+
+    </div>
+
+
+    </div>
+
