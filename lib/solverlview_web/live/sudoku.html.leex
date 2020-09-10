@@ -66,42 +66,43 @@
 
     <div id="container">
 
+    <!-- Sudoku panel -->
     <div id="sudoku">
+        <form phx-submit="<%= action(@stage) %>" method="post">
+            <div >
+                <img  src="/images/poweredby-phoenix-badge2-05.png" class="" alt="Phoenix Logo"/>
+                <span><h2 style="text-align: center;">Sudoku</h2></span>
+            </div>
 
-
-    <form phx-submit="<%= action(@stage) %>" method="post">
-        <div >
-            <img  src="/images/poweredby-phoenix-badge2-05.png" class="" alt="Phoenix Logo"/>
-            <span><h2 style="text-align: center;">Sudoku</h2></span>
-        </div>
-
-      <div style="text-align:center;">
-      <%= for i <- 0..8 do %>
-        <div>
-          <tr>
-          <%= for j <- 0..8 do %>
-            <td>
-            <input style="background: <%= cell_background(i, j) %>;
-                  width: 30px;
-                  height: 30px;
-                  color: <%= if cell_value(@solved_puzzle, i, j) == cell_value(@puzzle, i, j), do: "black", else: "blue" %>;
-                  border: 2px solid;
-                  font-size: 20px;
-                  font-weight: bold;
-                  text-align: center;"
-                    maxlength="1" size="1"
-                    <%= if disable_input?(@stage), do: "disabled" %>
-                    name="input[<%= i %>][<%= j %>]" value="<%= cell_value(@solved_puzzle, i, j) %>"
-              />
-            </td>
-          <% end %>
-          </tr>
-        </div>
-      <% end %>
-      <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
-      </div>
-    </form>
+            <div style="text-align:center;">
+            <%= for i <- 0..8 do %>
+            <div>
+              <tr>
+              <%= for j <- 0..8 do %>
+                <td>
+                <input style="background: <%= cell_background(i, j) %>;
+                      width: 30px;
+                      height: 30px;
+                      color: <%= if cell_value(@solved_puzzle, i, j) == cell_value(@puzzle, i, j), do: "black", else: "blue" %>;
+                      border: 2px solid;
+                      font-size: 20px;
+                      font-weight: bold;
+                      text-align: center;"
+                        maxlength="1" size="1"
+                        <%= if disable_input?(@stage), do: "disabled" %>
+                        name="input[<%= i %>][<%= j %>]" value="<%= cell_value(@solved_puzzle, i, j) %>"
+                  />
+                </td>
+              <% end %>
+              </tr>
+            </div>
+            <% end %>
+            <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
+            </div>
+        </form>
     </div>
+
+    <!-- MiniZinc panel -->
 
     <div id="minizinc">
 
@@ -125,6 +126,12 @@
       <h3 >
         <%= if @first_solution_ts > 0 do
           "# of solutions: #{@total_solutions} (time limit: #{@time_limit} msecs)"
+        end %>
+      </h3>
+
+      <h3>
+        <%= if @stage > 2 do
+           "Final status: #{String.upcase(Atom.to_string(@final_status))}"
         end %>
       </h3>
 

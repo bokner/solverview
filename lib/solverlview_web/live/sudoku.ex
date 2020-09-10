@@ -50,14 +50,11 @@ defmodule SolverlviewWeb.Sudoku do
   defp solve(input, time_limit) do
     puzzle = input_to_puzzle(input)
     my_pid = self()
-    {:ok, _pid} = run_solver(
-      fn ->
+    {:ok, _pid} =
         Sudoku.solve(
           puzzle,
           time_limit: time_limit,
           solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
-        )
-      end
     )
     puzzle
   end
@@ -107,8 +104,10 @@ defmodule SolverlviewWeb.Sudoku do
     solution_count = MinizincResults.get_solution_count(summary)
     Logger.debug "Done, found #{solution_count} solution(s)"
     stage = if solution_count > 0, do: @solved, else: @not_solved
+    assign(
     socket
-    |> update(:stage, fn _ -> stage end)
+    |> update(:stage, fn _ -> stage end),
+    [final_status: MinizincResults.get_status(summary)])
   end
 
   defp process_solver_event(:compiled, %{compilation_timestamp: ts} = compilation_info, socket) do
@@ -156,13 +155,6 @@ defmodule SolverlviewWeb.Sudoku do
     )
   end
 
-  defp run_solver(func) do
-    ## Will pass for demo, but shouldn't be doing this in prod...
-    File.cd!(
-      Application.app_dir(:solverl, "priv"),
-      func
-    )
-  end
   ######################
   ## Helpers (rendering)
   ######################

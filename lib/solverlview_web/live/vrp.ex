@@ -9,6 +9,11 @@ defmodule SolverlviewWeb.VRP do
   @not_solved 4
 
   @time_limit 1000
+
+  @solver "coin-bc"
+
+  @vrp_model MinizincUtils.resource_file("mzn/vrp.mzn")
+
   ######################
   ## LiveView API
   ######################
@@ -32,13 +37,11 @@ defmodule SolverlviewWeb.VRP do
     {:noreply, new_vrp(socket)}
   end
 
-  def handle_event("solve", data, socket) do
-    puzzle = solve(data, @time_limit)
+  def handle_event("solve", _, socket) do
+    :ok = solve(socket.assigns.vrp_data, @time_limit)
     {
       :noreply,
       socket
-      |> update(:solved_puzzle, fn _ -> puzzle end)
-      |> update(:puzzle, fn _ -> puzzle end)
       |> update(:start_ts, fn _ -> DateTime.utc_now() end)
     }
   end
@@ -46,52 +49,31 @@ defmodule SolverlviewWeb.VRP do
   ######################
   ## Helpers (processing)
   ######################
-  defp solve(input, time_limit) do
-    puzzle = input_to_puzzle(input)
+  defp solve(vrp_data, time_limit) do
+    Logger.debug "VRP data: #{inspect vrp_data}"
     my_pid = self()
-    {:ok, _pid} = File.cd!(
-      Application.app_dir(:solverl, "priv"),
-      fn ->
-        Sudoku.solve(
-          puzzle,
+    {:ok, _pid} =
+        MinizincSolver.solve(
+          @vrp_model,
+          Map.delete(vrp_data, :locations),
           time_limit: time_limit,
+          solver: @solver,
           solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
         )
-      end
-    )
-    puzzle
+    :ok
   end
 
-  defp input_to_puzzle(data) do
-    input = data["input"]
-    Enum.map(
-      Map.to_list(input),
-      fn ({_idx, m}) ->
-        Enum.map(
-          Map.to_list(m),
-          fn ({_numstr, val}) -> if val == "", do: 0, else: String.to_integer(val)
-          end
-        )
-      end
-    )
-  end
 
-  defp empty_sudoku() do
-    Enum.map(
-      0..8,
-      fn (_r) -> Enum.map(0..8, fn _c -> "" end)
-      end
-    )
-  end
+
 
   ## Given solver event, produce list of {key, val} that is to be applied to a socket
   defp process_solver_event(:solution, solution, socket) do
-    solved_puzzle = MinizincResults.get_solution_value(
+    vehicle_assignment = MinizincResults.get_solution_value(
       solution,
-      "puzzle"
+      "vehicle_assignment"
     )
+    assign(
     socket
-    |> update(:solved_puzzle, fn _ -> solved_puzzle end)
     |> update(:total_solutions, &(&1 + 1))
     |> update(:stage, fn _ -> @solving end)
     |> update(
@@ -100,15 +82,18 @@ defmodule SolverlviewWeb.VRP do
            0 -> DateTime.utc_now()
            ts -> ts
          end
-       )
+       ),
+    vehicle_assignment: vehicle_assignment)
   end
 
   defp process_solver_event(:summary, summary, socket) do
     solution_count = MinizincResults.get_solution_count(summary)
     Logger.debug "Done, found #{solution_count} solution(s)"
     stage = if solution_count > 0, do: @solved, else: @not_solved
-    socket
-    |> update(:stage, fn _ -> stage end)
+    assign(
+      socket
+      |> update(:stage, fn _ -> stage end),
+      [final_status: MinizincResults.get_status(summary)])
   end
 
   defp process_solver_event(:compiled, %{compilation_timestamp: ts} = compilation_info, socket) do
@@ -137,21 +122,27 @@ defmodule SolverlviewWeb.VRP do
     "next_puzzle"
   end
 
-  defp new_puzzle(socket) do
-    empty = empty_sudoku()
+  defp new_vrp(socket) do
+    vrp_data = VRP.extract_data(choose_vrp_instance())
     assign(
       socket,
       [
+        vrp_data: vrp_data,
         total_solutions: 0,
         start_ts: 0,
         compilation_ts: 0,
         first_solution_ts: 0,
-        puzzle: empty,
-        solved_puzzle: empty,
         stage: @start_new,
         time_limit: @time_limit
       ]
     )
+  end
+
+  defp choose_vrp_instance() do
+      Path.join("data/vrp",
+      #Enum.random
+      hd(File.ls!(Application.app_dir(:solverl, "priv/data/vrp")))
+  )
   end
 
   ######################
@@ -169,40 +160,31 @@ defmodule SolverlviewWeb.VRP do
     "Solved! Try another one..."
   end
 
-  defp button_name(@not_solved) do
-    "No solutions. Try another one..."
+  defp svg_viewbox(locations, padding, scale) do
+    {x, y} = Enum.unzip(locations)
+    min_x = Enum.min(x)
+    min_y = Enum.min(y)
+    width = Enum.max(x) - min_x
+    height = Enum.max(y) - min_y
+    "#{(min_x - padding)*scale} #{(min_y - padding)*scale} #{(width + 2*padding)*scale} #{(height + 2*padding)*scale} "
   end
 
-
-  defp disable_input?(@start_new) do
-    false
+  ## Demand=0 indicates depot location
+  defp location_radius(0, _, _) do
+    2
   end
 
-  defp disable_input?(_other) do
-    true
+  defp location_radius(_, _, _) do
+    1
   end
 
-  defp cell_value(sudoku, row, col) do
-    case Enum.at(Enum.at(sudoku, row), col) do
-      0 -> ""
-      v -> v
-    end
+  ## Demand=0 indicates depot location
+  defp location_color(0, _, _) do
+    "red"
   end
 
-  @grey_cell_color "#E8E8E8"
-  @white_cell_color "white"
-
-  defp cell_background(i, j) when i in [3, 4, 5] and j in [3, 4, 5] do
-    @white_cell_color
+  defp location_color(_, _, _) do
+    "blue"
   end
-
-  defp cell_background(i, j) when i in [3, 4, 5] or j in [3, 4, 5]  do
-    @grey_cell_color
-  end
-
-  defp cell_background(_i, _j) do
-    @white_cell_color
-  end
-
 
 end
