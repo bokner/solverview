@@ -1,4 +1,4 @@
-defmodule SolverlviewWeb.Sudoku do
+defmodule SolverlviewWeb.VRP do
   require Logger
   use Phoenix.LiveView
 
@@ -16,10 +16,9 @@ defmodule SolverlviewWeb.Sudoku do
   def mount(_params, _session, socket) do
     {
       :ok,
-      new_puzzle(socket)
+      new_vrp(socket)
     }
   end
-
 
   def handle_info({:solver_event, event, data}, socket) do
     {:noreply, process_solver_event(event, data, socket)}
@@ -29,8 +28,8 @@ defmodule SolverlviewWeb.Sudoku do
     {:noreply, socket}
   end
 
-  def handle_event("next_puzzle", _, socket) do
-    {:noreply, new_puzzle(socket)}
+  def handle_event("next_problem", _, socket) do
+    {:noreply, new_vrp(socket)}
   end
 
   def handle_event("solve", data, socket) do
@@ -50,7 +49,8 @@ defmodule SolverlviewWeb.Sudoku do
   defp solve(input, time_limit) do
     puzzle = input_to_puzzle(input)
     my_pid = self()
-    {:ok, _pid} = run_solver(
+    {:ok, _pid} = File.cd!(
+      Application.app_dir(:solverl, "priv"),
       fn ->
         Sudoku.solve(
           puzzle,
@@ -113,10 +113,8 @@ defmodule SolverlviewWeb.Sudoku do
 
   defp process_solver_event(:compiled, %{compilation_timestamp: ts} = compilation_info, socket) do
     Logger.debug "Compiled...#{inspect compilation_info}"
-    assign(
-      socket,
-      [compilation_ts: ts]
-    )
+    assign(socket,
+      [compilation_ts: ts])
   end
 
   defp process_solver_event(_event, _data, socket) do
@@ -156,13 +154,6 @@ defmodule SolverlviewWeb.Sudoku do
     )
   end
 
-  defp run_solver(func) do
-    ## Will pass for demo, but shouldn't be doing this in prod...
-    File.cd!(
-      Application.app_dir(:solverl, "priv"),
-      func
-    )
-  end
   ######################
   ## Helpers (rendering)
   ######################
