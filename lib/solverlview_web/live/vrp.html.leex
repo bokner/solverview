@@ -55,7 +55,9 @@
         <%= for {d, {i,j}} <- Enum.zip(@vrp_data.demand, @vrp_data.locations) do %>
 
            <circle cx="<%= i %>" cy="<%= j %>" r="<%= location_radius(d, i, j) %>"
-            stroke="green" stroke-width="0.5" fill="<%= location_color(d, i, j) %>" />
+                stroke="green" stroke-width="0.5" fill="<%= location_color(d, i, j) %>" >
+            <title><%= d %></title>
+           </circle>
 
         <% end %>
         </svg>

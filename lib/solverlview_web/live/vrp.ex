@@ -140,8 +140,9 @@ defmodule SolverlviewWeb.VRP do
 
   defp choose_vrp_instance() do
       Path.join("data/vrp",
-      #Enum.random
-      hd(File.ls!(Application.app_dir(:solverl, "priv/data/vrp")))
+      #Enum.random(
+      hd(
+      File.ls!(Application.app_dir(:solverl, "priv/data/vrp")))
   )
   end
 
