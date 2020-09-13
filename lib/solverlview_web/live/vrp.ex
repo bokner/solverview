@@ -8,11 +8,15 @@ defmodule SolverlviewWeb.VRP do
   @solved    3
   @not_solved 4
 
-  @time_limit 1000
+  @time_limit 60 * 10* 1000
 
-  @solver "coin-bc"
+  @solver "gecode"
+  # "cplex"
+  #"coin-bc"
+  #"chuffed"
 
   @vrp_model MinizincUtils.resource_file("mzn/vrp.mzn")
+
 
   ######################
   ## LiveView API
@@ -42,6 +46,7 @@ defmodule SolverlviewWeb.VRP do
     {
       :noreply,
       socket
+      |> update(:stage, fn _ -> @solving end)
       |> update(:start_ts, fn _ -> DateTime.utc_now() end)
     }
   end
@@ -53,13 +58,13 @@ defmodule SolverlviewWeb.VRP do
     Logger.debug "VRP data: #{inspect vrp_data}"
     my_pid = self()
     {:ok, _pid} =
-        MinizincSolver.solve(
-          @vrp_model,
-          Map.delete(vrp_data, :locations),
-          time_limit: time_limit,
-          solver: @solver,
-          solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
-        )
+      MinizincSolver.solve(
+        @vrp_model,
+        Map.delete(vrp_data, :locations),
+        time_limit: time_limit,
+        solver: @solver,
+        solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
+      )
     :ok
   end
 
@@ -72,9 +77,11 @@ defmodule SolverlviewWeb.VRP do
       solution,
       "vehicle_assignment"
     )
-    assign(
+
     socket
+    |> update(:vehicle_assignment, fn _ -> vehicle_assignment end)
     |> update(:total_solutions, &(&1 + 1))
+    |> update(:objective, fn _ -> MinizincResults.get_solution_objective(solution) end)
     |> update(:stage, fn _ -> @solving end)
     |> update(
          :first_solution_ts,
@@ -82,8 +89,8 @@ defmodule SolverlviewWeb.VRP do
            0 -> DateTime.utc_now()
            ts -> ts
          end
-       ),
-    vehicle_assignment: vehicle_assignment)
+       )
+
   end
 
   defp process_solver_event(:summary, summary, socket) do
@@ -93,13 +100,16 @@ defmodule SolverlviewWeb.VRP do
     assign(
       socket
       |> update(:stage, fn _ -> stage end),
-      [final_status: MinizincResults.get_status(summary)])
+      [final_status: MinizincResults.get_status(summary)]
+    )
   end
 
   defp process_solver_event(:compiled, %{compilation_timestamp: ts} = compilation_info, socket) do
     Logger.debug "Compiled...#{inspect compilation_info}"
-    assign(socket,
-      [compilation_ts: ts])
+    assign(
+      socket,
+      [compilation_ts: ts]
+    )
   end
 
   defp process_solver_event(_event, _data, socket) do
@@ -115,19 +125,24 @@ defmodule SolverlviewWeb.VRP do
   end
 
   defp action(@solved) do
-    "next_puzzle"
+    "next_problem"
   end
 
   defp action(@not_solved) do
-    "next_puzzle"
+    "next_problem"
   end
 
   defp new_vrp(socket) do
-    vrp_data = VRP.extract_data(choose_vrp_instance())
+    vrp_instance = choose_vrp_instance()
+    vrp_data = VRP.extract_data(vrp_instance)
     assign(
       socket,
       [
+        vrp_instance: vrp_instance,
         vrp_data: vrp_data,
+        route_colors: generate_route_colors(vrp_data),
+        vehicle_assignment: [],
+        objective: nil,
         total_solutions: 0,
         start_ts: 0,
         compilation_ts: 0,
@@ -139,11 +154,15 @@ defmodule SolverlviewWeb.VRP do
   end
 
   defp choose_vrp_instance() do
-      Path.join("data/vrp",
-      #Enum.random(
-      hd(
-      File.ls!(Application.app_dir(:solverl, "priv/data/vrp")))
-  )
+    Path.join(
+      "data/vrp",
+      Enum.random(
+      #hd(
+        File.ls!(Application.app_dir(:solverl, "priv/data/vrp"))
+      )
+      #"vrp_16_3_1"
+      #"vrp_16_5_1"
+    )
   end
 
   ######################
@@ -161,13 +180,48 @@ defmodule SolverlviewWeb.VRP do
     "Solved! Try another one..."
   end
 
+  defp button_name(@not_solved) do
+    "No solutions. Try another one..."
+  end
+
   defp svg_viewbox(locations, padding, scale) do
     {x, y} = Enum.unzip(locations)
     min_x = Enum.min(x)
     min_y = Enum.min(y)
     width = Enum.max(x) - min_x
     height = Enum.max(y) - min_y
-    "#{(min_x - padding)*scale} #{(min_y - padding)*scale} #{(width + 2*padding)*scale} #{(height + 2*padding)*scale} "
+    "#{(min_x - padding) * scale} #{(min_y - padding) * scale} #{(width + 2 * padding) * scale} #{
+      (height + 2 * padding) * scale
+    } "
+  end
+
+  defp vehicle_routes(locations, vehicle_assignment) do
+    for a <- vehicle_assignment do
+      {vehicle_path, _loc_idx} = Enum.reduce(
+        a,
+        {[], 0},
+        fn
+          (0, {path, idx}) -> ## customer not in the path
+            {path, idx + 1}
+          (1, {path, idx}) -> ## customer location visited, add it to the vehicle's route
+            {[Enum.at(locations, idx) | path], idx + 1}
+        end
+      )
+      vehicle_path
+    end
+  end
+
+  ## Attach color to every route
+  defp color_routes(routes, colors) do
+    Enum.zip(routes, colors)
+  end
+
+  defp generate_route_colors(vrp_data) do
+    ColorStream.hex(hue: 0.5) |> Enum.take(vrp_data.m)
+  end
+
+  defp svg_polygon_points(path) do
+    Enum.join(Enum.map(path, fn {x, y} -> "#{x},#{y}" end), " ")
   end
 
   ## Demand=0 indicates depot location

@@ -35,6 +35,7 @@ defmodule Solverlview.MixProject do
   defp deps do
     [
       {:solverl, git: "https://github.com/bokner/solverl.git"},
+      {:color_stream, "~> 0.0.1"},
       {:phoenix, "~> 1.5.4"},
       {:phoenix_live_view, "~> 0.13.0"},
       {:floki, ">= 0.0.0", only: :test},

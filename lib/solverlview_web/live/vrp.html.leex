@@ -47,20 +47,32 @@
     <form phx-submit="<%= action(@stage) %>" method="post">
         <div >
             <img  src="/images/poweredby-phoenix-badge2-05.png" class="" alt="Phoenix Logo"/>
-            <span><h2 style="text-align: center;">VRP</h2></span>
+            <span><h2 style="text-align: center;"> VRP (<%= @vrp_instance %>) </h2></span>
         </div>
 
       <div style="text-align:center;">
         <svg width="450" height="450" viewbox="<%= svg_viewbox(@vrp_data.locations, 2, 1) %>">
-        <%= for {d, {i,j}} <- Enum.zip(@vrp_data.demand, @vrp_data.locations) do %>
+            <%= for {d, {i,j}} <- Enum.zip(@vrp_data.demand, @vrp_data.locations) do %>
 
-           <circle cx="<%= i %>" cy="<%= j %>" r="<%= location_radius(d, i, j) %>"
-                stroke="green" stroke-width="0.5" fill="<%= location_color(d, i, j) %>" >
-            <title><%= d %></title>
-           </circle>
+               <circle cx="<%= i %>" cy="<%= j %>" r="<%= location_radius(d, i, j) %>"
+                    stroke="green" stroke-width="0.25" fill="<%= location_color(d, i, j) %>" >
+                <title>Demand(<%= i %>, <%= j %>): <%= d %></title>
+               </circle>
 
-        <% end %>
+            <% end %>
+
+
+
+            <!-- Vehicle routes -->
+            <%= if @first_solution_ts > 0 do %>
+                <%= for {path, path_color} <- color_routes(vehicle_routes(@vrp_data.locations, @vehicle_assignment), @route_colors) do %>
+                    <polygon points="<%= svg_polygon_points(path) %>" style="fill:none;stroke-width:0.5" stroke="#<%= path_color %>" />
+                <% end %>
+            <% end %>
+
         </svg>
+
+
 
       <div>
         <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
@@ -83,17 +95,26 @@
       </h3>
 
 
-      <h3 >
-        <%= if @first_solution_ts > 0 do
-          "1st solution found in #{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)} msecs"
-        end %>
-      </h3>
 
-      <h3 >
-        <%= if @first_solution_ts > 0 do
-          "# of solutions: #{@total_solutions} (time limit: #{@time_limit} msecs)"
-        end %>
-      </h3>
+        <%= if @first_solution_ts > 0 do %>
+            <h3>
+              1st solution found in <%= "#{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)}" %> msecs
+            </h3>
+
+            <h3>
+                # of solutions: <%= "#{@total_solutions} (time limit: #{@time_limit}" %> msecs)
+            </h3>
+
+            <%= if @objective do %>
+                <h3>
+                    Objective: <%= @objective %>
+                </h3>
+            <% end %>
+
+        <% end %>
+
+
+
 
       <h3>
         <%= if @stage > 2 do

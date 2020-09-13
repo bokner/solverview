@@ -38,6 +38,7 @@ defmodule SolverlviewWeb.Sudoku do
     {
       :noreply,
       socket
+      |> update(:stage, fn _ -> @solving end)
       |> update(:solved_puzzle, fn _ -> puzzle end)
       |> update(:puzzle, fn _ -> puzzle end)
       |> update(:start_ts, fn _ -> DateTime.utc_now() end)

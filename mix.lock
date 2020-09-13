@@ -1,5 +1,6 @@
 %{
   "artificery": {:hex, :artificery, "0.4.3", "0bc4260f988dcb9dda4b23f9fc3c6c8b99a6220a331534fdf5bf2fd0d4333b02", [:mix], [], "hexpm", "12e95333a30e20884e937abdbefa3e7f5e05609c2ba8cf37b33f000b9ffc0504"},
+  "color_stream": {:hex, :color_stream, "0.0.2", "400fe4b5efe3fcaf723d5bf2ba02f868b92b16b90b0bc99ebcf515a5678412ae", [:mix], [], "hexpm", "b1181f32b310311016006f4f8d52b3418d1af6f06e71903daabafdcaa602a29d"},
   "cowboy": {:hex, :cowboy, "2.8.0", "f3dc62e35797ecd9ac1b50db74611193c29815401e53bac9a5c0577bd7bc667d", [:rebar3], [{:cowlib, "~> 2.9.1", [hex: :cowlib, repo: "hexpm", optional: false]}, {:ranch, "~> 1.7.1", [hex: :ranch, repo: "hexpm", optional: false]}], "hexpm", "4643e4fba74ac96d4d152c75803de6fad0b3fa5df354c71afdd6cbeeb15fac8a"},
   "cowlib": {:hex, :cowlib, "2.9.1", "61a6c7c50cf07fdd24b2f45b89500bb93b6686579b069a89f88cb211e1125c78", [:rebar3], [], "hexpm", "e4175dc240a70d996156160891e1c62238ede1729e45740bdd38064dad476170"},
   "distance": {:hex, :distance, "0.2.2", "76f7cd6b6e21b3c1430a0776d594955baafd9ebf1133f98f62cdbb180074215a", [:mix], [], "hexpm", "e02a4b25ad5c617acaeda1b3d5b4efbe3e010eb0f95a6dedff99f8a9dfafacf1"},
@@ -30,7 +31,7 @@
   "recon": {:hex, :recon, "2.5.1", "430ffa60685ac1efdfb1fe4c97b8767c92d0d92e6e7c3e8621559ba77598678a", [:mix, :rebar3], [], "hexpm", "5721c6b6d50122d8f68cccac712caa1231f97894bab779eff5ff0f886cb44648"},
   "redbug": {:hex, :redbug, "1.2.2", "366d8961770ddc7bb5d209fbadddfa7271005487f938c087a0e385a57abfee33", [:rebar3], [], "hexpm", "b5fe7b94e487be559cb0ec1c0e938c9761205d3e91a96bf263bdf1beaebea729"},
   "rexbug": {:hex, :rexbug, "1.0.4", "b9908d95da835c7353ef051bc587662c9054fa3c0c11e96de9bad7fe18460aad", [:mix], [{:mix_test_watch, ">= 0.5.0", [hex: :mix_test_watch, repo: "hexpm", optional: true]}, {:redbug, "~> 1.2", [hex: :redbug, repo: "hexpm", optional: false]}], "hexpm", "4826565f39e617fa0eea3e916f02928b2f1d880bf5e084cb80da86a3e369390e"},
-  "solverl": {:git, "https://github.com/bokner/solverl.git", "9a53e19bbde8acbdc121511f07f608e321486466", []},
+  "solverl": {:git, "https://github.com/bokner/solverl.git", "1d6ae21df51b3dcfa36948a721678f786df24995", []},
   "telemetry": {:hex, :telemetry, "0.4.2", "2808c992455e08d6177322f14d3bdb6b625fbcfd233a73505870d8738a2f4599", [:rebar3], [], "hexpm", "2d1419bd9dda6a206d7b5852179511722e2b18812310d304620c7bd92a13fcef"},
   "telemetry_metrics": {:hex, :telemetry_metrics, "0.5.0", "1b796e74add83abf844e808564275dfb342bcc930b04c7577ab780e262b0d998", [:mix], [{:telemetry, "~> 0.4", [hex: :telemetry, repo: "hexpm", optional: false]}], "hexpm", "31225e6ce7a37a421a0a96ec55244386aec1c190b22578bd245188a4a33298fd"},
   "telemetry_poller": {:hex, :telemetry_poller, "0.5.1", "21071cc2e536810bac5628b935521ff3e28f0303e770951158c73eaaa01e962a", [:rebar3], [{:telemetry, "~> 0.4", [hex: :telemetry, repo: "hexpm", optional: false]}], "hexpm", "4cab72069210bc6e7a080cec9afffad1b33370149ed5d379b81c7c5f0c663fd4"},
