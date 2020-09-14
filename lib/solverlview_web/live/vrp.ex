@@ -8,7 +8,7 @@ defmodule SolverlviewWeb.VRP do
   @solved    3
   @not_solved 4
 
-  @time_limit 60 * 10* 1000
+  @time_limit 60 * 5 * 1000
 
   @solver "gecode"
   # "cplex"

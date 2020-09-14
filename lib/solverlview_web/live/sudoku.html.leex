@@ -64,7 +64,7 @@
 
 
 
-    <div id="container">
+<div id="container">
 
     <!-- Sudoku panel -->
     <div id="sudoku">
@@ -102,41 +102,68 @@
         </form>
     </div>
 
-    <!-- MiniZinc panel -->
-
+   <!-- MiniZinc panel -->
     <div id="minizinc">
 
        <div >
           <img  src="/images/minizinc.png" class=""  alt="MiniZinc Logo"/>
         </div>
 
-      <h3>
-        <%= if @compilation_ts > 0 do
-          "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
-        end %>
-      </h3>
+
+        <%= if (@stage == 2 and @compilation_ts == 0) do %>
+        <h3>
+           MiniZinc is compiling the model...
+        </h3>
+        <% end %>
 
 
-      <h3 >
-        <%= if @first_solution_ts > 0 do
-          "1st solution found in #{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)} msecs"
-        end %>
-      </h3>
 
-      <h3 >
-        <%= if @first_solution_ts > 0 do
-          "# of solutions: #{@total_solutions} (time limit: #{@time_limit} msecs)"
-        end %>
-      </h3>
+        <%= if @compilation_ts > 0 do %>
+        <h3>
+          Model compiled in <%= DateTime.diff(@compilation_ts, @start_ts, :millisecond) %> msecs
+        </h3>
+        <% end %>
 
-      <h3>
-        <%= if @stage > 2 do
-           "Final status: #{String.upcase(Atom.to_string(@final_status))}"
-        end %>
+
+
+
+        <%= if @first_solution_ts > 0 do %>
+            <h3>
+              1st solution found in <%= "#{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)}" %> msecs
+            </h3>
+
+            <h3>
+                # of solutions: <%= "#{@total_solutions} (time limit: #{@time_limit}" %> msecs)
+            </h3>
+
+            <%= if @objective do %>
+                <h3>
+                    Objective: <%= @objective %>
+                </h3>
+            <% end %>
+
+            <%= if @stage == 2 do %>
+                <h3 style="color: red; font-weight: bold;">
+                   Solving...
+                </h3>
+            <% end %>
+
+        <% end %>
+
+
+
+
+
+        <%= if @stage > 2 do %>
+          <h3 style="font-weight: bold;">
+           Final status: <%= String.upcase(Atom.to_string(@final_status)) %>
+          </h3>
+        <% end %>
       </h3>
 
     </div>
 
 
-    </div>
+
+</div>
 

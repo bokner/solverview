@@ -39,7 +39,7 @@
 
 
 
-    <div id="container">
+<div id="container">
 
     <!-- VRP panel -->
     <div id="vrp">
@@ -47,7 +47,10 @@
     <form phx-submit="<%= action(@stage) %>" method="post">
         <div >
             <img  src="/images/poweredby-phoenix-badge2-05.png" class="" alt="Phoenix Logo"/>
-            <span><h2 style="text-align: center;"> VRP (<%= @vrp_instance %>) </h2></span>
+            <h2 style="text-align: center;"> VRP (<%= @vrp_instance %>) </h2>
+            <h3 style="text-align: center;">
+                <%= @vrp_data.n %> customers, <%= @vrp_data.m %> vehicles, vehicle capacity: <%= @vrp_data.capacity %>
+             </h3>
         </div>
 
       <div style="text-align:center;">
@@ -88,11 +91,21 @@
           <img  src="/images/minizinc.png" class=""  alt="MiniZinc Logo"/>
         </div>
 
-      <h3>
-        <%= if @compilation_ts > 0 do
-          "Model compiled in #{DateTime.diff(@compilation_ts, @start_ts, :millisecond)} msecs"
-        end %>
-      </h3>
+
+        <%= if (@stage == 2 and @compilation_ts == 0) do %>
+        <h3>
+           MiniZinc is compiling the model...
+        </h3>
+        <% end %>
+
+
+
+        <%= if @compilation_ts > 0 do %>
+        <h3>
+          Model compiled in <%= DateTime.diff(@compilation_ts, @start_ts, :millisecond) %> msecs
+        </h3>
+        <% end %>
+
 
 
 
@@ -111,19 +124,27 @@
                 </h3>
             <% end %>
 
+            <%= if @stage == 2 do %>
+                <h3 style="color: red; font-weight: bold;">
+                   Solving...
+                </h3>
+            <% end %>
+
         <% end %>
 
 
 
 
-      <h3>
-        <%= if @stage > 2 do
-           "Final status: #{String.upcase(Atom.to_string(@final_status))}"
-        end %>
+
+        <%= if @stage > 2 do %>
+          <h3 style="font-weight: bold;">
+           Final status: <%= String.upcase(Atom.to_string(@final_status)) %>
+          </h3>
+        <% end %>
       </h3>
 
     </div>
 
 
-    </div>
+</div>
 
