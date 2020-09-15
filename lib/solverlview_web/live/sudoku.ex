@@ -144,6 +144,7 @@ defmodule SolverlviewWeb.Sudoku do
     assign(
       socket,
       [
+        objective: nil,
         total_solutions: 0,
         start_ts: 0,
         compilation_ts: 0,
