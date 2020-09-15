@@ -1,11 +1,11 @@
-defmodule SolverlviewWeb.Router do
-  use SolverlviewWeb, :router
+defmodule SolverViewWeb.Router do
+  use SolverViewWeb, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, {SolverlviewWeb.LayoutView, :root}
+    plug :put_root_layout, {SolverViewWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -14,7 +14,7 @@ defmodule SolverlviewWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", SolverlviewWeb do
+  scope "/", SolverViewWeb do
     pipe_through :browser
     
     live "/", PageLive, :index
@@ -25,7 +25,7 @@ defmodule SolverlviewWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", SolverlviewWeb do
+  # scope "/api", SolverViewWeb do
   #   pipe_through :api
   # end
 
@@ -41,7 +41,7 @@ defmodule SolverlviewWeb.Router do
 
     scope "/" do
       pipe_through :browser
-      live_dashboard "/dashboard", metrics: SolverlviewWeb.Telemetry
+      live_dashboard "/dashboard", metrics: SolverViewWeb.Telemetry
     end
   end
 end

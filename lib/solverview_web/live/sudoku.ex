@@ -1,4 +1,4 @@
-defmodule SolverlviewWeb.Sudoku do
+defmodule SolverViewWeb.Sudoku do
   require Logger
   use Phoenix.LiveView
 

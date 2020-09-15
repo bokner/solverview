@@ -8,11 +8,11 @@
 use Mix.Config
 
 # Configures the endpoint
-config :solverlview, SolverlviewWeb.Endpoint,
+config :solverview, SolverViewWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "A03qNtSFSo7Q4Eo7d2uLQos+wfeIFlIRXa+kZMgbFyZySw78jJppHdKeBHyl3bn9",
-  render_errors: [view: SolverlviewWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: Solverlview.PubSub,
+  render_errors: [view: SolverViewWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: SolverView.PubSub,
   live_view: [signing_salt: "pH/U3jBb"]
 
 # Configures Elixir's Logger

@@ -1,6 +1,6 @@
-defmodule Solverlview do
+defmodule SolverView do
   @moduledoc """
-  Solverlview keeps the contexts that define your domain
+  SolverView keeps the contexts that define your domain
   and business logic.
 
   Contexts are also responsible for managing your data, regardless

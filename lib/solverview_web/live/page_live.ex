@@ -1,5 +1,5 @@
-defmodule SolverlviewWeb.PageLive do
-  use SolverlviewWeb, :live_view
+defmodule SolverViewWeb.PageLive do
+  use SolverViewWeb, :live_view
 
   @impl true
   def mount(_params, _session, socket) do
@@ -26,7 +26,7 @@ defmodule SolverlviewWeb.PageLive do
   end
 
   defp search(query) do
-    if not SolverlviewWeb.Endpoint.config(:code_reloader) do
+    if not SolverViewWeb.Endpoint.config(:code_reloader) do
       raise "action disabled when not in development"
     end
 

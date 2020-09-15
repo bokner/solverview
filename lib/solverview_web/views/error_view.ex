@@ -1,5 +1,5 @@
-defmodule SolverlviewWeb.ErrorView do
-  use SolverlviewWeb, :view
+defmodule SolverViewWeb.ErrorView do
+  use SolverViewWeb, :view
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

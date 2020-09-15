@@ -8,7 +8,7 @@ secret_key_length = 64
 secret_key_base =
 	:crypto.strong_rand_bytes(secret_key_length) |> Base.encode64 |> binary_part(0, secret_key_length)
 
-config :solverlview, SolverlviewWeb.Endpoint,
+config :solverview, SolverViewWeb.Endpoint,
   http: [
     port: String.to_integer(System.get_env("PORT") || "4000"),
     transport_options: [socket_opts: [:inet6]]
@@ -20,7 +20,7 @@ config :solverlview, SolverlviewWeb.Endpoint,
 # If you are doing OTP releases, you need to instruct Phoenix
 # to start each relevant endpoint:
 #
-#     config :solverlview, SolverlviewWeb.Endpoint, server: true
+#     config :solverview, SolverViewWeb.Endpoint, server: true
 #
 # Then you can assemble a release by calling `mix release`.
 # See `mix help release` for more information.

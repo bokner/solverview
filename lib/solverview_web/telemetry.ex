@@ -1,4 +1,4 @@
-defmodule SolverlviewWeb.Telemetry do
+defmodule SolverViewWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics
 
@@ -42,7 +42,7 @@ defmodule SolverlviewWeb.Telemetry do
     [
       # A module, function and arguments to be invoked periodically.
       # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {SolverlviewWeb, :count_users, []}
+      # {SolverViewWeb, :count_users, []}
     ]
   end
 end

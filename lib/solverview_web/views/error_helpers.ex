@@ -1,4 +1,4 @@
-defmodule SolverlviewWeb.ErrorHelpers do
+defmodule SolverViewWeb.ErrorHelpers do
   @moduledoc """
   Conveniences for translating and building error messages.
   """
@@ -39,9 +39,9 @@ defmodule SolverlviewWeb.ErrorHelpers do
     # should be written to the errors.po file. The :count option is
     # set by Ecto and indicates we should also apply plural rules.
     if count = opts[:count] do
-      Gettext.dngettext(SolverlviewWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(SolverViewWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(SolverlviewWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(SolverViewWeb.Gettext, "errors", msg, opts)
     end
   end
 end

@@ -1,12 +1,12 @@
-defmodule SolverlviewWeb do
+defmodule SolverViewWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use SolverlviewWeb, :controller
-      use SolverlviewWeb, :view
+      use SolverViewWeb, :controller
+      use SolverViewWeb, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -19,11 +19,11 @@ defmodule SolverlviewWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: SolverlviewWeb
+      use Phoenix.Controller, namespace: SolverViewWeb
 
       import Plug.Conn
-      import SolverlviewWeb.Gettext
-      alias SolverlviewWeb.Router.Helpers, as: Routes
+      import SolverViewWeb.Gettext
+      alias SolverViewWeb.Router.Helpers, as: Routes
       import Phoenix.LiveView.Controller
     end
   end
@@ -31,8 +31,8 @@ defmodule SolverlviewWeb do
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/solverlview_web/templates",
-        namespace: SolverlviewWeb
+        root: "lib/solverview_web/templates",
+        namespace: SolverViewWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
@@ -46,7 +46,7 @@ defmodule SolverlviewWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {SolverlviewWeb.LayoutView, "live.html"}
+        layout: {SolverViewWeb.LayoutView, "live.html"}
 
       unquote(view_helpers())
     end
@@ -73,7 +73,7 @@ defmodule SolverlviewWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import SolverlviewWeb.Gettext
+      import SolverViewWeb.Gettext
     end
   end
 
@@ -88,9 +88,9 @@ defmodule SolverlviewWeb do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
-      import SolverlviewWeb.ErrorHelpers
-      import SolverlviewWeb.Gettext
-      alias SolverlviewWeb.Router.Helpers, as: Routes
+      import SolverViewWeb.ErrorHelpers
+      import SolverViewWeb.Gettext
+      alias SolverViewWeb.Router.Helpers, as: Routes
     end
   end
 

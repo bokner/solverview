@@ -1,4 +1,4 @@
-defmodule Solverlview.Application do
+defmodule SolverView.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,25 +8,25 @@ defmodule Solverlview.Application do
   def start(_type, _args) do
     children = [
       # Start the Telemetry supervisor
-      SolverlviewWeb.Telemetry,
+      SolverViewWeb.Telemetry,
       # Start the PubSub system
-      {Phoenix.PubSub, name: Solverlview.PubSub},
+      {Phoenix.PubSub, name: SolverView.PubSub},
       # Start the Endpoint (http/https)
-      SolverlviewWeb.Endpoint
-      # Start a worker by calling: Solverlview.Worker.start_link(arg)
-      # {Solverlview.Worker, arg}
+      SolverViewWeb.Endpoint
+      # Start a worker by calling: SolverView.Worker.start_link(arg)
+      # {SolverView.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Solverlview.Supervisor]
+    opts = [strategy: :one_for_one, name: SolverView.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    SolverlviewWeb.Endpoint.config_change(changed, removed)
+    SolverViewWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 end

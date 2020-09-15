@@ -46,8 +46,8 @@ end
 # when running `mix distillery.release`, the first release in the file
 # will be used by default
 
-release :solverlview do
-  set version: current_version(:solverlview)
+release :solverview do
+  set version: current_version(:solverview)
   set applications: [
     :runtime_tools
   ]

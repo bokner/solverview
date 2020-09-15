@@ -1,4 +1,4 @@
-defmodule SolverlviewWeb.VRP do
+defmodule SolverViewWeb.VRP do
   require Logger
   use Phoenix.LiveView
 

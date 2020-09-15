@@ -22,16 +22,16 @@ RUN \
 
 WORKDIR /opt
 
-RUN git clone https://github.com/bokner/solverlview 
+RUN git clone https://github.com/bokner/solverview 
 
-RUN useradd -u 9876 solverlview -d /home/solverlview -m
+RUN useradd -u 9876 solverview -d /home/solverview -m
 
-RUN chmod a+rwx /opt/solverlview
-RUN chown -R solverlview /opt/solverlview
+RUN chmod a+rwx /opt/solverview
+RUN chown -R solverview /opt/solverview
 
-USER solverlview 
+USER solverview 
 
-WORKDIR /opt/solverlview
+WORKDIR /opt/solverview
 
 RUN \
   mix local.rebar --force && \

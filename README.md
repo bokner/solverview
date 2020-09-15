@@ -1,4 +1,4 @@
-# SolverlView
+# SolverView
 
 [solverl](https://github.com/bokner/solverl) + [LiveView](https://github.com/phoenixframework/phoenix_live_view) examples.
 
