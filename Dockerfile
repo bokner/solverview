@@ -15,8 +15,10 @@ RUN \
   locale-gen en_US.UTF-8 && \
   wget https://packages.erlang-solutions.com/erlang/debian/pool/esl-erlang_22.3.4.9-1~ubuntu~xenial_amd64.deb && \
   dpkg -i esl-erlang_22.3.4.9-1~ubuntu~xenial_amd64.deb && \
+  rm esl-erlang_22.3.4.9-1~ubuntu~xenial_amd64.deb && \
   wget https://packages.erlang-solutions.com/erlang/debian/pool/elixir_1.10.4-1~ubuntu~xenial_all.deb && \
   dpkg -i elixir_1.10.4-1~ubuntu~xenial_all.deb && \
+  rm elixir_1.10.4-1~ubuntu~xenial_all.deb && \
   apt-get update -y
 
 
