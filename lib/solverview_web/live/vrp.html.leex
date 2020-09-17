@@ -34,7 +34,41 @@
      float:right;
     }
 
-    </style>
+
+    /****************************/
+    /* Form for MiniZinc params */
+    /****************************/
+    .form-inline {
+      display: flex;
+      flex-flow: row wrap;
+      align-items: center;
+    }
+
+    .form-inline label {
+      margin: 5px 10px 5px 0;
+    }
+
+    .form-inline input {
+      margin: 5px 10px 5px 0;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+    }
+
+
+
+    @media (max-width: 800px) {
+      .form-inline input {
+        margin: 10px 0;
+      }
+
+      .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+      }
+}
+
+</style>
 
 
 
@@ -44,7 +78,7 @@
     <!-- VRP panel -->
     <div id="vrp">
 
-    <form phx-submit="<%= action(@stage) %>" method="post">
+    <form phx-submit="next_problem" method="post">
         <div >
             <img  src="/images/poweredby-phoenix-badge2-05.png" class="" alt="Phoenix Logo"/>
             <h2 style="text-align: center;"> VRP (<%= @vrp_instance %>) </h2>
@@ -69,7 +103,10 @@
             <!-- Vehicle routes -->
             <%= if @first_solution_ts > 0 do %>
                 <%= for {path, path_color} <- color_routes(vehicle_routes(@vrp_data.locations, @vehicle_assignment), @route_colors) do %>
-                    <polygon points="<%= svg_polygon_points(path) %>" style="fill:none;stroke-width:0.5" stroke="#<%= path_color %>" />
+                    <polygon
+                        points="<%= svg_polygon_points(path) %>"
+                        style="fill:none; stroke-width:0.5; stroke: #<%= path_color %>"
+                    />
                 <% end %>
             <% end %>
 
@@ -78,7 +115,7 @@
 
 
       <div>
-        <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
+        <button <%= if @stage == 2, do: "disabled" %> >Choose another instance</button>
       </div>
       </div>
     </form>
@@ -86,10 +123,26 @@
 
    <!-- MiniZinc panel -->
     <div id="minizinc">
+          <img  src="/images/minizinc.png"  width="50px" height="50px" alt="MiniZinc Logo"/>
+          <!-- MiniZinc params -->
+          <form  phx-submit="solve" class="form-inline" method="post">
 
-       <div >
-          <img  src="/images/minizinc.png" class=""  alt="MiniZinc Logo"/>
-        </div>
+            <label for="solver">Solver: </label>
+            <select name="solver" id="select_solver">
+                <%= for {solver_id, solver_name} <- solver_list() do %>
+                <option value="<%= solver_id %>" <%= if solver_id == @solver_args["solver"], do: "selected" %> ><%= solver_name %></option>
+                <% end %>
+            </select>
+
+            <label for="time_limit" style="margin-left:20px;">Time limit (secs):</label>
+            <input id="time_limit"  maxlength="5" length="5" size="5" name="time_limit" value="<%= round(@solver_args["time_limit"]/1000) %>"/>
+            <br><br>
+            <div>
+                <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
+            </div>
+
+          </form>
+
 
 
         <%= if (@stage == 2 and @compilation_ts == 0) do %>
@@ -115,7 +168,7 @@
             </h3>
 
             <h3>
-                # of solutions: <%= "#{@total_solutions} (time limit: #{@time_limit}" %> msecs)
+                # of solutions: <%= @total_solutions %>
             </h3>
 
             <%= if @objective do %>
@@ -124,11 +177,6 @@
                 </h3>
             <% end %>
 
-            <%= if @stage == 2 do %>
-                <h3 style="color: red; font-weight: bold;">
-                   Solving...
-                </h3>
-            <% end %>
 
         <% end %>
 

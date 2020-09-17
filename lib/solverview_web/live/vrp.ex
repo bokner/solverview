@@ -11,6 +11,7 @@ defmodule SolverViewWeb.VRP do
   @time_limit 60 * 5 * 1000
 
   @solver "gecode"
+  #"gecode"
   # "cplex"
   #"coin-bc"
   #"chuffed"
@@ -41,28 +42,35 @@ defmodule SolverViewWeb.VRP do
     {:noreply, new_vrp(socket)}
   end
 
-  def handle_event("solve", _, socket) do
-    :ok = solve(socket.assigns.vrp_data, @time_limit)
+  def handle_event("solve", args, socket) do
+    time_limit = case MinizincUtils.parse_value(args["time_limit"]) do
+      t when is_integer(t) -> 1000 * t
+      ## secs -> msecs
+      _not_integer -> @time_limit
+    end
+    :ok = solve(socket.assigns.vrp_data, args["solver"], time_limit)
     {
       :noreply,
-      socket
-      |> update(:stage, fn _ -> @solving end)
-      |> update(:start_ts, fn _ -> DateTime.utc_now() end)
+      reset_minizinc(socket)
+        |> update(:solver_args, fn _ -> %{"solver" => args["solver"], "time_limit" => time_limit} end)
+        |> update(:stage, fn _ -> @solving end)
+        |> update(:start_ts, fn _ -> DateTime.utc_now() end)
+
     }
   end
 
   ######################
   ## Helpers (processing)
   ######################
-  defp solve(vrp_data, time_limit) do
-    Logger.debug "VRP data: #{inspect vrp_data}"
+  defp solve(vrp_data, solver_id, time_limit) do
+    #Logger.debug "VRP data: #{inspect vrp_data}"
     my_pid = self()
     {:ok, _pid} =
       MinizincSolver.solve(
         @vrp_model,
         Map.delete(vrp_data, :locations),
         time_limit: time_limit,
-        solver: @solver,
+        solver: solver_id,
         solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
       )
     :ok
@@ -104,12 +112,11 @@ defmodule SolverViewWeb.VRP do
     )
   end
 
-  defp process_solver_event(:compiled, %{compilation_timestamp: ts} = compilation_info, socket) do
-    Logger.debug "Compiled...#{inspect compilation_info}"
-    assign(
-      socket,
-      [compilation_ts: ts]
-    )
+  defp process_solver_event(:compiled, _compilation_info, socket) do
+    Logger.debug "Compiled..."
+    socket
+    |> update(:compilation_ts, fn _ -> DateTime.utc_now() end)
+
   end
 
   defp process_solver_event(_event, _data, socket) do
@@ -135,31 +142,74 @@ defmodule SolverViewWeb.VRP do
   defp new_vrp(socket) do
     vrp_instance = choose_vrp_instance()
     vrp_data = VRP.extract_data(vrp_instance)
+    reset_minizinc(
+      assign(
+        socket,
+        [
+          vrp_instance: vrp_instance,
+          vrp_data: vrp_data,
+          solver_args: %{
+            "solver" => "org.gecode.gecode",
+            "time_limit" => @time_limit
+          },
+          route_colors: generate_route_colors(vrp_data),
+          stage: @start_new,
+          time_limit: @time_limit
+        ]
+      )
+    )
+  end
+
+  defp reset_minizinc(socket) do
     assign(
       socket,
       [
-        vrp_instance: vrp_instance,
-        vrp_data: vrp_data,
-        route_colors: generate_route_colors(vrp_data),
         vehicle_assignment: [],
         objective: nil,
         total_solutions: 0,
         start_ts: 0,
         compilation_ts: 0,
-        first_solution_ts: 0,
-        stage: @start_new,
-        time_limit: @time_limit
+        first_solution_ts: 0
       ]
     )
   end
 
+  defp solver_list() do
+    disallowed_solverids = disallowed_solvers
+    Enum.flat_map(
+      MinizincSolver.get_solvers(),
+      fn solver ->
+        if solver["id"] in disallowed_solverids do
+          []
+        else
+          [
+            {solver["id"], solver["name"]}
+          ]
+        end
+
+      end
+    )
+  end
+
+  defp disallowed_solvers() do
+    [
+      "org.minizinc.findmus",
+      "org.gecode.gist",
+      "org.minizinc.globalizer",
+      "org.minizinc.mip.scip",
+      "org.minizinc.mip.xpress"
+    ]
+  end
+
   defp choose_vrp_instance() do
+    instances = File.ls!(Application.app_dir(:solverl, "priv/data/vrp"))
     Path.join(
       "data/vrp",
       Enum.random(
-      #hd(
-        File.ls!(Application.app_dir(:solverl, "priv/data/vrp"))
+        #hd(
+        instances
       )
+      #"vrp_21_6_1"
       #"vrp_16_3_1"
       #"vrp_16_5_1"
     )
@@ -168,21 +218,15 @@ defmodule SolverViewWeb.VRP do
   ######################
   ## Helpers (rendering)
   ######################
-  defp button_name(@start_new) do
-    "Solve"
-  end
 
   defp button_name(@solving) do
     "Solving..."
   end
 
-  defp button_name(@solved) do
-    "Solved! Try another one..."
+  defp button_name(_stage) do
+    "Solve"
   end
 
-  defp button_name(@not_solved) do
-    "No solutions. Try another one..."
-  end
 
   defp svg_viewbox(locations, padding, scale) do
     {x, y} = Enum.unzip(locations)
@@ -217,7 +261,8 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp generate_route_colors(vrp_data) do
-    ColorStream.hex(hue: 0.5) |> Enum.take(vrp_data.m)
+    ColorStream.hex(hue: 0.5)
+    |> Enum.take(vrp_data.m)
   end
 
   defp svg_polygon_points(path) do
