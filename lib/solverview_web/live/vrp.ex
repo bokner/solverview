@@ -9,12 +9,7 @@ defmodule SolverViewWeb.VRP do
   @not_solved 4
 
   @time_limit 60 * 5 * 1000
-
-  @solver "gecode"
-  #"gecode"
-  # "cplex"
-  #"coin-bc"
-  #"chuffed"
+  
 
   @vrp_model MinizincUtils.resource_file("mzn/vrp.mzn")
 
@@ -112,10 +107,10 @@ defmodule SolverViewWeb.VRP do
     )
   end
 
-  defp process_solver_event(:compiled, _compilation_info, socket) do
+  defp process_solver_event(:compiled, compilation_info, socket) do
     Logger.debug "Compiled..."
     socket
-    |> update(:compilation_ts, fn _ -> DateTime.utc_now() end)
+    |> update(:compilation_ts, fn _ -> compilation_info.compilation_timestamp end)
 
   end
 
@@ -123,21 +118,6 @@ defmodule SolverViewWeb.VRP do
     socket
   end
 
-  defp action(@start_new) do
-    "solve"
-  end
-
-  defp action(@solving) do
-    "ignore"
-  end
-
-  defp action(@solved) do
-    "next_problem"
-  end
-
-  defp action(@not_solved) do
-    "next_problem"
-  end
 
   defp new_vrp(socket) do
     vrp_instance = choose_vrp_instance()
@@ -175,7 +155,7 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp solver_list() do
-    disallowed_solverids = disallowed_solvers
+    disallowed_solverids = disallowed_solvers()
     Enum.flat_map(
       MinizincSolver.get_solvers(),
       fn solver ->
