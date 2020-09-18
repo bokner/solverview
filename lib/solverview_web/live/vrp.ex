@@ -7,9 +7,10 @@ defmodule SolverViewWeb.VRP do
   @solving   2
   @solved    3
   @not_solved 4
+  @error      5
 
   @time_limit 60 * 5 * 1000
-  
+
 
   @vrp_model MinizincUtils.resource_file("mzn/vrp.mzn")
 
@@ -114,7 +115,18 @@ defmodule SolverViewWeb.VRP do
 
   end
 
-  defp process_solver_event(_event, _data, socket) do
+  defp process_solver_event(:minizinc_error, error, socket) do
+    assign(socket,
+      [
+        stage: @error,
+        minizinc_error: error,
+        final_status: "MINIZINC ERROR"
+      ]
+    )
+  end
+
+  defp process_solver_event(event, data, socket) do
+    Logger.error "Unknown event #{inspect event}, data: #{inspect data}"
     socket
   end
 

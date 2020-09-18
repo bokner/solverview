@@ -183,10 +183,15 @@
 
 
 
+        <%= if @stage == 5 do %>
+         <h3>
+            MiniZinc Error: <%= inspect @minizinc_error.error %>
+         </h3>
+        <% end %>
 
         <%= if @stage > 2 do %>
           <h3 style="font-weight: bold;">
-           Final status: <%= String.upcase(Atom.to_string(@final_status)) %>
+           Final status: <%= String.upcase("#{@final_status}") %>
           </h3>
         <% end %>
       </h3>
