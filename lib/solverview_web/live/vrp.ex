@@ -48,9 +48,9 @@ defmodule SolverViewWeb.VRP do
     {
       :noreply,
       reset_minizinc(socket)
-        |> update(:solver_args, fn _ -> %{"solver" => args["solver"], "time_limit" => time_limit} end)
-        |> update(:stage, fn _ -> @solving end)
-        |> update(:start_ts, fn _ -> DateTime.utc_now() end)
+      |> update(:solver_args, fn _ -> %{"solver" => args["solver"], "time_limit" => time_limit} end)
+      |> update(:stage, fn _ -> @solving end)
+      |> update(:start_ts, fn _ -> DateTime.utc_now() end)
 
     }
   end
@@ -59,7 +59,6 @@ defmodule SolverViewWeb.VRP do
   ## Helpers (processing)
   ######################
   defp solve(vrp_data, solver_id, time_limit) do
-    #Logger.debug "VRP data: #{inspect vrp_data}"
     my_pid = self()
     {:ok, _pid} =
       MinizincSolver.solve(
@@ -77,13 +76,16 @@ defmodule SolverViewWeb.VRP do
 
   ## Given solver event, produce list of {key, val} that is to be applied to a socket
   defp process_solver_event(:solution, solution, socket) do
-    vehicle_assignment = MinizincResults.get_solution_value(
+
+    subcircuits = MinizincResults.get_solution_value(
       solution,
-      "vehicle_assignment"
+      "succ"
     )
 
+    vroutes = vehicle_routes(socket.assigns.vrp_data.locations, subcircuits)
+
     socket
-    |> update(:vehicle_assignment, fn _ -> vehicle_assignment end)
+    |> update(:vehicle_routes, fn _ -> vroutes end)
     |> update(:total_solutions, &(&1 + 1))
     |> update(:objective, fn _ -> MinizincResults.get_solution_objective(solution) end)
     |> update(:stage, fn _ -> @solving end)
@@ -98,6 +100,11 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp process_solver_event(:summary, summary, socket) do
+    last_solution = MinizincResults.get_last_solution(summary)
+    Logger.debug "Last solution: #{inspect last_solution}"
+    Logger.debug "Locations: #{inspect socket.assigns.vrp_data.locations}"
+    Logger.debug "Succ: #{inspect MinizincResults.get_solution_value(last_solution, "succ")}"
+
     solution_count = MinizincResults.get_solution_count(summary)
     Logger.debug "Done, found #{solution_count} solution(s)"
     stage = if solution_count > 0, do: @solved, else: @not_solved
@@ -116,7 +123,8 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp process_solver_event(:minizinc_error, error, socket) do
-    assign(socket,
+    assign(
+      socket,
       [
         stage: @error,
         minizinc_error: error,
@@ -156,7 +164,7 @@ defmodule SolverViewWeb.VRP do
     assign(
       socket,
       [
-        vehicle_assignment: [],
+        vehicle_routes: [],
         objective: nil,
         total_solutions: 0,
         start_ts: 0,
@@ -194,7 +202,8 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp choose_vrp_instance() do
-    instances = File.ls!(Application.app_dir(:solverl, "priv/data/vrp"))
+    instances = #["vrp_16_3_1"]
+    File.ls!(Application.app_dir(:solverl, "priv/data/vrp"))
     Path.join(
       "data/vrp",
       Enum.random(
@@ -204,6 +213,33 @@ defmodule SolverViewWeb.VRP do
       #"vrp_21_6_1"
       #"vrp_16_3_1"
       #"vrp_16_5_1"
+    )
+  end
+
+  ######################
+  # Routes
+  ######################
+  def vehicle_routes(locations, subcircuits) do
+    for s <- subcircuits do
+      for loc <- circuit_to_route(s) do
+        Enum.at(locations, loc)
+      end
+    end
+  end
+
+  ## Turn subcircuit into the sequence of visits
+  def circuit_to_route(circuit) do
+    ## We assume that subcircuit is 1-based; bring it to 0-based for simplicity
+    s0 = for c <- circuit, do: c - 1
+    ## The last member of circuit is a convenient starting point
+    start = List.last(s0)
+    Enum.reduce_while(
+      s0,
+      [start],
+      fn _i, [next | _rest] = acc ->
+        next = Enum.at(s0, next)
+        if next != start, do: {:cont, [next | acc]}, else: {:halt, acc}
+      end
     )
   end
 
@@ -231,21 +267,7 @@ defmodule SolverViewWeb.VRP do
     } "
   end
 
-  defp vehicle_routes(locations, vehicle_assignment) do
-    for a <- vehicle_assignment do
-      {vehicle_path, _loc_idx} = Enum.reduce(
-        a,
-        {[], 0},
-        fn
-          (0, {path, idx}) -> ## customer not in the path
-            {path, idx + 1}
-          (1, {path, idx}) -> ## customer location visited, add it to the vehicle's route
-            {[Enum.at(locations, idx) | path], idx + 1}
-        end
-      )
-      vehicle_path
-    end
-  end
+
 
   ## Attach color to every route
   defp color_routes(routes, colors) do
