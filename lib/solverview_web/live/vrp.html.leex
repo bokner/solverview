@@ -102,11 +102,18 @@
 
             <!-- Vehicle routes -->
             <%= if @first_solution_ts > 0 do %>
-                <%= for {path, path_color} <- color_routes(@vehicle_routes, @route_colors) do %>
+                <%= for {route, route_color} <- color_routes(@vehicle_routes, @route_colors) do %>
                     <polygon
-                        points="<%= svg_polygon_points(path) %>"
-                        style="fill:none; stroke-width:0.5; stroke: #<%= path_color %>"
+                        points="<%= svg_polygon_points(route) %>"
+                        style="fill:none; stroke-width:0.5; stroke: #<%= route_color %>"
                     />
+                    <!-- Highlight stops with it's route color -->
+                    <%= for {x,y} <- route do %>
+                          <circle cx="<%= x %>" cy="<%= y %>" r="1"
+                               fill="#<%= route_color %>" >
+                          </circle>
+                    <% end %>
+
                 <% end %>
             <% end %>
 

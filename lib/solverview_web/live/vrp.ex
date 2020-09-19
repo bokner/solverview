@@ -289,7 +289,7 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp location_radius(_, _, _) do
-    1
+    0.5
   end
 
   ## Demand=0 indicates depot location
