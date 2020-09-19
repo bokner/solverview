@@ -22,8 +22,10 @@ RUN \
   apt-get update -y
 
 
-WORKDIR /opt
+RUN apt-get install -y vim
 
+WORKDIR /opt
+ 
 RUN git clone https://github.com/bokner/solverview 
 
 RUN useradd -u 9876 solverview -d /home/solverview -m
@@ -33,12 +35,23 @@ RUN chown -R solverview /opt/solverview
 
 USER solverview 
 
+WORKDIR /home/solverview
+
+## Make OR-Tools available
+RUN wget https://github.com/google/or-tools/releases/download/v7.8/or-tools_flatzinc_ubuntu-18.04_v7.8.7959.tar.gz
+RUN tar xvf or-tools_flatzinc_ubuntu-18.04_v7.8.7959.tar.gz
+RUN rm or-tools_flatzinc_ubuntu-18.04_v7.8.7959.tar.gz
+RUN mkdir -p /home/solverview/.minizinc/solvers
+RUN cp /opt/solverview/docker_assets/com.google.or-tools.msc /home/solverview/.minizinc/solvers
+
 WORKDIR /opt/solverview
 
+## Install mix
 RUN \
   mix local.rebar --force && \
   mix local.hex --force && \
   mix deps.get && mix compile && mix setup
+
 
 EXPOSE 4000
 

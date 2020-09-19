@@ -1,0 +1,20 @@
+{
+    "executable": "/home/solverview/or-tools_flatzinc_Ubuntu-18.04-64bit_v7.8.7959/bin/fzn-or-tools",
+    "id": "com.google.or-tools",
+    "isGUIApplication": false,
+    "mznlib": "/home/solverview/or-tools_flatzinc_Ubuntu-18.04-64bit_v7.8.7959/share/minizinc",
+    "mznlibVersion": 1,
+    "name": "OR Tools",
+    "needsMznExecutable": false,
+    "needsPathsFile": false,
+    "needsSolns2Out": true,
+    "needsStdlibDir": false,
+    "stdFlags": [
+        "-a",
+        "-v"
+    ],
+    "supportsFzn": true,
+    "supportsMzn": false,
+    "supportsNL": false,
+    "version": "7.8.0"
+}
