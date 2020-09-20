@@ -122,7 +122,7 @@
 
 
       <div>
-        <button <%= if @stage == 2, do: "disabled" %> >Choose another instance</button>
+        <button <%= if @stage == 3, do: "disabled" %> >Choose another instance</button>
       </div>
       </div>
     </form>
@@ -132,7 +132,7 @@
     <div id="minizinc">
           <img  src="/images/minizinc.png"  width="50px" height="50px" alt="MiniZinc Logo"/>
           <!-- MiniZinc params -->
-          <form  phx-submit="solve" class="form-inline" method="post">
+          <form  phx-submit="<%= action(@stage) %>" class="form-inline" method="post">
 
             <label for="solver">Solver: </label>
             <select name="solver" id="select_solver">
@@ -145,14 +145,14 @@
             <input id="time_limit"  maxlength="5" length="5" size="5" name="time_limit" value="<%= round(@solver_args["time_limit"]/1000) %>"/>
             <br><br>
             <div>
-                <button <%= if @stage == 2, do: "disabled" %> ><%= button_name(@stage) %></button>
+                <button> <%= button_name(@stage) %> </button>
             </div>
 
           </form>
 
 
 
-        <%= if (@stage == 2 and @compilation_ts == 0) do %>
+        <%= if (@stage == 3 and @compilation_ts == 0) do %>
         <h3>
            MiniZinc is compiling the model...
         </h3>
@@ -190,13 +190,13 @@
 
 
 
-        <%= if @stage == 5 do %>
+        <%= if @stage == 6 do %>
          <h3>
             MiniZinc Error: <%= inspect @minizinc_error.error %>
          </h3>
         <% end %>
 
-        <%= if @stage > 2 do %>
+        <%= if @stage > 3 do %>
           <h3 style="font-weight: bold;">
            Final status: <%= String.upcase("#{@final_status}") %>
           </h3>

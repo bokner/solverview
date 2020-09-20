@@ -4,10 +4,12 @@ defmodule SolverViewWeb.VRP do
 
   ## Stages
   @start_new 1
-  @solving   2
-  @solved    3
-  @not_solved 4
-  @error      5
+  @stopping  2
+  @solving   3
+  @solved    4
+  @not_solved 5
+  @error      6
+
 
   @time_limit 60 * 5 * 1000
 
@@ -44,13 +46,23 @@ defmodule SolverViewWeb.VRP do
       ## secs -> msecs
       _not_integer -> @time_limit
     end
-    :ok = solve(socket.assigns.vrp_data, args["solver"], time_limit)
+    {:ok, solver_pid} = solve(socket.assigns.vrp_data, args["solver"], time_limit)
     {
       :noreply,
       reset_minizinc(socket)
       |> update(:solver_args, fn _ -> %{"solver" => args["solver"], "time_limit" => time_limit} end)
       |> update(:stage, fn _ -> @solving end)
       |> update(:start_ts, fn _ -> DateTime.utc_now() end)
+      |> update(:solver_pid, fn _ -> solver_pid end)
+    }
+  end
+
+  def handle_event("stop", _, socket) do
+    solver_pid = socket.assigns.solver_pid
+    stop_solver(solver_pid)
+    {:noreply,
+      socket
+      |> update(:stage, fn _ -> @stopping end)
 
     }
   end
@@ -68,7 +80,11 @@ defmodule SolverViewWeb.VRP do
         solver: solver_id,
         solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
       )
-    :ok
+  end
+
+  defp stop_solver(solver_pid) do
+    Logger.debug "Request to stop the solver..."
+    MinizincSolver.stop_solver(solver_pid)
   end
 
 
@@ -100,11 +116,6 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp process_solver_event(:summary, summary, socket) do
-    last_solution = MinizincResults.get_last_solution(summary)
-    Logger.debug "Last solution: #{inspect last_solution}"
-    Logger.debug "Locations: #{inspect socket.assigns.vrp_data.locations}"
-    Logger.debug "Succ: #{inspect MinizincResults.get_solution_value(last_solution, "succ")}"
-
     solution_count = MinizincResults.get_solution_count(summary)
     Logger.debug "Done, found #{solution_count} solution(s)"
     stage = if solution_count > 0, do: @solved, else: @not_solved
@@ -169,7 +180,8 @@ defmodule SolverViewWeb.VRP do
         total_solutions: 0,
         start_ts: 0,
         compilation_ts: 0,
-        first_solution_ts: 0
+        first_solution_ts: 0,
+        solver_pid: nil
       ]
     )
   end
@@ -248,11 +260,28 @@ defmodule SolverViewWeb.VRP do
   ######################
 
   defp button_name(@solving) do
-    "Solving..."
+    "Stop"
+  end
+
+  defp button_name(@stopping) do
+    "Stopping..."
   end
 
   defp button_name(_stage) do
     "Solve"
+  end
+
+
+  defp action(@solving) do
+    "stop"
+  end
+
+  defp action(@stopping) do
+    "ignore"
+  end
+
+  defp action(_) do
+    "solve"
   end
 
 
