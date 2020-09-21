@@ -29,7 +29,13 @@ defmodule SolverViewWeb.VRP do
   end
 
   def handle_info({:solver_event, event, data}, socket) do
-    {:noreply, process_solver_event(event, data, socket)}
+    {:noreply,
+      process_solver_event(event, data,
+        socket
+        |> update(:running_time,
+             fn _ -> DateTime.diff(DateTime.utc_now(), socket.assigns.start_ts, :millisecond)
+             end)
+      )}
   end
 
   def handle_event("ignore", _, socket) do
@@ -181,6 +187,7 @@ defmodule SolverViewWeb.VRP do
         start_ts: 0,
         compilation_ts: 0,
         first_solution_ts: 0,
+        running_time: 0,
         solver_pid: nil
       ]
     )

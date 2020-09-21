@@ -162,7 +162,7 @@
 
         <%= if @compilation_ts > 0 do %>
         <h3>
-          Model compiled in <%= DateTime.diff(@compilation_ts, @start_ts, :millisecond) %> msecs
+          Model compiled in <strong><%= DateTime.diff(@compilation_ts, @start_ts, :millisecond) %></strong> msecs
         </h3>
         <% end %>
 
@@ -171,16 +171,16 @@
 
         <%= if @first_solution_ts > 0 do %>
             <h3>
-              1st solution found in <%= "#{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)}" %> msecs
+              1st solution found in <strong><%= "#{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)}" %></strong> msecs
             </h3>
 
             <h3>
-                # of solutions: <%= @total_solutions %>
+                Found <strong><%= @total_solutions %></strong> solution(s) in <strong><%= @running_time %></strong> msecs
             </h3>
 
             <%= if @objective do %>
                 <h3>
-                    Objective: <%= @objective %>
+                    Objective: <strong><%= @objective %></strong>
                 </h3>
             <% end %>
 
@@ -200,6 +200,8 @@
           <h3 style="font-weight: bold;">
            Final status: <%= String.upcase("#{@final_status}") %>
           </h3>
+          <h3>
+           Finished in <strong><%= @running_time %></strong> msecs
         <% end %>
       </h3>
 
