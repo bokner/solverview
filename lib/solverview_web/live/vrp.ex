@@ -29,13 +29,19 @@ defmodule SolverViewWeb.VRP do
   end
 
   def handle_info({:solver_event, event, data}, socket) do
-    {:noreply,
-      process_solver_event(event, data,
+    {
+      :noreply,
+      process_solver_event(
+        event,
+        data,
         socket
-        |> update(:running_time,
+        |> update(
+             :running_time,
              fn _ -> DateTime.diff(DateTime.utc_now(), socket.assigns.start_ts, :millisecond)
-             end)
-      )}
+             end
+           )
+      )
+    }
   end
 
   def handle_event("ignore", _, socket) do
@@ -66,7 +72,8 @@ defmodule SolverViewWeb.VRP do
   def handle_event("stop", _, socket) do
     solver_pid = socket.assigns.solver_pid
     stop_solver(solver_pid)
-    {:noreply,
+    {
+      :noreply,
       socket
       |> update(:stage, fn _ -> @stopping end)
 
@@ -106,6 +113,7 @@ defmodule SolverViewWeb.VRP do
 
     vroutes = vehicle_routes(socket.assigns.vrp_data.locations, subcircuits)
 
+    now_ts = DateTime.utc_now()
     socket
     |> update(:vehicle_routes, fn _ -> vroutes end)
     |> update(:total_solutions, &(&1 + 1))
@@ -114,10 +122,11 @@ defmodule SolverViewWeb.VRP do
     |> update(
          :first_solution_ts,
          fn
-           0 -> DateTime.utc_now()
+           0 -> now_ts
            ts -> ts
          end
        )
+    |> update(:last_solution_ts, fn _ -> now_ts end)
 
   end
 
@@ -187,6 +196,7 @@ defmodule SolverViewWeb.VRP do
         start_ts: 0,
         compilation_ts: 0,
         first_solution_ts: 0,
+        last_solution_ts: 0,
         running_time: 0,
         solver_pid: nil
       ]
@@ -222,7 +232,7 @@ defmodule SolverViewWeb.VRP do
 
   defp choose_vrp_instance() do
     instances = #["vrp_16_3_1"]
-    File.ls!(Application.app_dir(:solverl, "priv/data/vrp"))
+      File.ls!(Application.app_dir(:solverl, "priv/data/vrp"))
     Path.join(
       "data/vrp",
       Enum.random(
