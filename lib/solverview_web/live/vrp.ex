@@ -34,14 +34,15 @@ defmodule SolverViewWeb.VRP do
       process_solver_event(
         event,
         data,
-        socket
-        |> update(
-             :running_time,
-             fn _ -> DateTime.diff(DateTime.utc_now(), socket.assigns.start_ts, :millisecond)
-             end
-           )
+        update_running_time(socket)
       )
     }
+  end
+
+  def handle_info({:tick, _TimerRef}, socket) do
+    #Logger.debug "Ticking..."
+    schedule_tick(socket.assigns.stage, 1000)
+    {:noreply, update_running_time(socket)}
   end
 
   def handle_event("ignore", _, socket) do
@@ -59,6 +60,7 @@ defmodule SolverViewWeb.VRP do
       _not_integer -> @time_limit
     end
     {:ok, solver_pid} = solve(socket.assigns.vrp_data, args["solver"], time_limit)
+    schedule_tick(@solving, 1000)
     {
       :noreply,
       reset_minizinc(socket)
@@ -80,6 +82,7 @@ defmodule SolverViewWeb.VRP do
     }
   end
 
+
   ######################
   ## Helpers (processing)
   ######################
@@ -100,7 +103,26 @@ defmodule SolverViewWeb.VRP do
     MinizincSolver.stop_solver(solver_pid)
   end
 
+  defp schedule_tick(@solving, interval) do
+    MinizincUtils.send_after(:tick, interval)
+  end
 
+  defp schedule_tick(_other, _interval) do
+    :ignore
+  end
+
+  defp update_running_time(%{assigns: assigns} = socket) do
+    socket
+    |> update(
+         :running_time,
+         fn tm -> case assigns.stage do
+                    @solving ->
+                      DateTime.diff(DateTime.utc_now(), assigns.start_ts, :millisecond)
+                    _ -> tm
+                  end
+         end
+       )
+  end
 
 
   ## Given solver event, produce list of {key, val} that is to be applied to a socket
@@ -149,6 +171,7 @@ defmodule SolverViewWeb.VRP do
   end
 
   defp process_solver_event(:minizinc_error, error, socket) do
+
     assign(
       socket,
       [

@@ -147,7 +147,9 @@
             <div>
                 <button> <%= button_name(@stage) %> </button>
             </div>
-
+            <%= if @stage in [2,3] do %>
+                <text style="margin-left: 20px;" > <b><%= round(@running_time/1000) %></b> secs </text>
+            <% end %>
           </form>
 
 
