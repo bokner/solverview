@@ -22,6 +22,9 @@ defmodule SolverViewWeb.Router do
     live("/sudoku", Sudoku)
 
     live("/vrp", VRP)
+
+    live("/ide", IDE)
+
   end
 
   # Other scopes may use custom stacks.

@@ -1,0 +1,182 @@
+    <style>
+
+
+    #container {
+    display: flex;
+    }
+
+    #vrp {
+    border: solid;
+    padding-top: 0.5em;
+    flex: 0 0 50%;
+    }
+
+    #minizinc {
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-bottom: 0.5em;
+    border: solid;
+    flex: 1;
+    }
+
+    .center {
+
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    }
+
+    .top_right img {
+     margin: auto;
+     right: 2em;
+     /*display: inline-block;*/
+     float:right;
+    }
+
+
+    /****************************/
+    /* Form for MiniZinc params */
+    /****************************/
+    .form-inline {
+      display: flex;
+      flex-flow: row wrap;
+      align-items: center;
+    }
+
+    .form-inline label {
+      margin: 5px 10px 5px 0;
+    }
+
+    .form-inline input {
+      margin: 5px 10px 5px 0;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+    }
+
+
+
+    @media (max-width: 800px) {
+      .form-inline input {
+        margin: 10px 0;
+      }
+
+      .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+      }
+}
+
+</style>
+
+
+
+
+<div id="container">
+
+    <!-- Model panel -->
+    <div id="vrp">
+
+    <form phx-submit="next_problem" method="post">
+        <div >
+            <img  src="/images/poweredby-phoenix-badge2-05.png" class="" alt="Phoenix Logo"/>
+            <h2 style="text-align: center;"> Model </h2>
+            <textarea>
+                % Use this editor as a MiniZinc scratch book
+            </textarea>
+        </div>
+
+
+      <div>
+        <button>Save model</button>
+      </div>
+      </div>
+    </form>
+    </div>
+
+   <!-- MiniZinc panel -->
+    <div id="minizinc">
+          <img  src="/images/minizinc.png"  width="50px" height="50px" alt="MiniZinc Logo"/>
+          <!-- MiniZinc params -->
+          <form  phx-submit="<%= action(@stage) %>" class="form-inline" method="post">
+
+            <label for="solver">Solver: </label>
+            <select name="solver" id="select_solver">
+                <%= for {solver_id, solver_name} <- solver_list() do %>
+                <option value="<%= solver_id %>" <%= if solver_id == @solver_args["solver"], do: "selected" %> ><%= solver_name %></option>
+                <% end %>
+            </select>
+
+            <label for="time_limit" style="margin-left:20px;">Time limit (secs):</label>
+            <input id="time_limit"  maxlength="5" length="5" size="5" name="time_limit" value="<%= round(@solver_args["time_limit"]/1000) %>"/>
+            <br><br>
+            <div>
+                <button> <%= button_name(@stage) %> </button>
+            </div>
+            <%= if @stage in [2,3] do %>
+                <text style="margin-left: 20px;" > <b><%= round(@running_time/1000) %></b> secs </text>
+            <% end %>
+          </form>
+
+
+
+        <%= if (@stage == 3 and @compilation_ts == 0) do %>
+        <h3>
+           MiniZinc is compiling the model...
+        </h3>
+        <% end %>
+
+
+
+        <%= if @compilation_ts > 0 do %>
+        <h3>
+          Model compiled in <b><%= DateTime.diff(@compilation_ts, @start_ts, :millisecond) %></b> msecs
+        </h3>
+        <% end %>
+
+
+
+
+        <%= if @first_solution_ts > 0 do %>
+            <h3>
+              1st solution found in <b><%= "#{DateTime.diff(@first_solution_ts, @compilation_ts, :millisecond)}" %></b> msecs
+            </h3>
+
+            <h3>
+                Found <b><%= @total_solutions %></b> solution(s) in
+                <b><%= DateTime.diff(@last_solution_ts, @compilation_ts, :millisecond) %></b> msecs
+            </h3>
+
+            <%= if @objective do %>
+                <h3>
+                    Objective: <b><%= @objective %></b>
+                </h3>
+            <% end %>
+
+
+        <% end %>
+
+
+
+
+        <%= if @stage == 6 do %>
+         <h3>
+            MiniZinc Error: <%= inspect @minizinc_error.error %>
+         </h3>
+        <% end %>
+
+        <%= if @stage > 3 do %>
+          <h3 style="font-weight: bold;">
+           Final status: <%= String.upcase("#{@final_status}") %>
+          </h3>
+          <h3>
+           Finished in <b><%= @running_time %></b> msecs
+        <% end %>
+      </h3>
+
+    </div>
+
+
+</div>
+
