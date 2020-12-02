@@ -1,28 +1,48 @@
 # Get MiniZinc base image from the latest Ubuntu LTS
-FROM minizinc/minizinc:latest 
+#FROM minizinc/minizinc:latest
 
 
-ENV  LANG=en_US.UTF-8 \
-    SHELL=/bin/sh \
-    TERM=xterm
+#Dockerfile
+FROM ubuntu:bionic
 
 
+ARG elixir_version=1.10.4-1
+ENV LANG=C.UTF-8 \
+     SHELL=/bin/sh \
+     TERM=xterm
 
 
 RUN \
   apt-get update -y && \
-  apt-get install -y build-essential git wget npm locales libwxgtk3.0-gtk3-dev libwxbase3.0-dev libsctp1 && \
-  locale-gen en_US.UTF-8 && \
-  wget https://packages.erlang-solutions.com/erlang/debian/pool/esl-erlang_22.3.4.9-1~ubuntu~xenial_amd64.deb && \
-  dpkg -i esl-erlang_22.3.4.9-1~ubuntu~xenial_amd64.deb && \
-  rm esl-erlang_22.3.4.9-1~ubuntu~xenial_amd64.deb && \
-  wget https://packages.erlang-solutions.com/erlang/debian/pool/elixir_1.10.4-1~ubuntu~xenial_all.deb && \
-  dpkg -i elixir_1.10.4-1~ubuntu~xenial_all.deb && \
-  rm elixir_1.10.4-1~ubuntu~xenial_all.deb && \
-  apt-get update -y
+  apt-get install -y build-essential git wget nodejs npm locales libwxgtk3.0-dev libwxbase3.0-dev libsctp1 && \
+  locale-gen en_US.UTF-8
 
 
+
+# Get the Erlang Solutions Registry Info and use apt-get to install
+RUN wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb \
+    && dpkg -i erlang-solutions_2.0_all.deb \
+    && apt-get update -y
+
+RUN apt-get install -y erlang-dev erlang-parsetools
+RUN apt-get install -y elixir=${elixir_version}
+# Update npm
+RUN npm i -g npm
+
+# Optional
 RUN apt-get install -y vim
+
+WORKDIR /opt
+
+## Minizinc
+ENV PATH "$PATH:/opt/MiniZincIDE/bin"
+ENV LD_LIBRARY_PATH "$LD_LIBRARY_PATH:/opt/MiniZincIDE/lib"
+
+RUN \
+wget https://github.com/MiniZinc/MiniZincIDE/releases/download/2.5.2/MiniZincIDE-2.5.2-bundle-linux-x86_64.tgz && \
+	tar -zxvf MiniZincIDE-2.5.2-bundle-linux-x86_64.tgz && \
+	mv MiniZincIDE-2.5.2-bundle-linux-x86_64 MiniZincIDE && \
+	rm -rf MiniZincIDE-2.5.2-bundle-linux-x86_64.tgz
 
 WORKDIR /opt
  
