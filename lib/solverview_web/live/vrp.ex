@@ -94,6 +94,7 @@ defmodule SolverViewWeb.VRP do
         Map.delete(vrp_data, :locations),
         time_limit: time_limit,
         solver: solver_id,
+        log_output: &log_output/1,
         solution_handler: fn (event, data) -> send(my_pid, {:solver_event, event, data}) end
       )
   end
@@ -293,6 +294,10 @@ defmodule SolverViewWeb.VRP do
         if next != start, do: {:cont, [next | acc]}, else: {:halt, acc}
       end
     )
+  end
+
+  defp log_output(line) do
+    Logger.debug("MZN: #{line}")
   end
 
   ######################
