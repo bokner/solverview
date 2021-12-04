@@ -7,9 +7,9 @@ FROM ubuntu:bionic
 
 
 ARG elixir_version=1.10.4-1
-ENV LANG=C.UTF-8 \
-     SHELL=/bin/sh \
-     TERM=xterm
+ENV LANG C.UTF-8
+ENV SHELL /bin/sh
+ENV TERM xterm
 
 
 RUN \
@@ -34,15 +34,16 @@ RUN apt-get install -y vim
 
 WORKDIR /opt
 
-## Minizinc
+## MiniZinc
+ARG minizinc_version=2.5.2
 ENV PATH "$PATH:/opt/MiniZincIDE/bin"
 ENV LD_LIBRARY_PATH "$LD_LIBRARY_PATH:/opt/MiniZincIDE/lib"
 
 RUN \
-wget https://github.com/MiniZinc/MiniZincIDE/releases/download/2.5.2/MiniZincIDE-2.5.2-bundle-linux-x86_64.tgz && \
-	tar -zxvf MiniZincIDE-2.5.2-bundle-linux-x86_64.tgz && \
-	mv MiniZincIDE-2.5.2-bundle-linux-x86_64 MiniZincIDE && \
-	rm -rf MiniZincIDE-2.5.2-bundle-linux-x86_64.tgz
+wget https://github.com/MiniZinc/MiniZincIDE/releases/download/${minizinc_version}/MiniZincIDE-${minizinc_version}-bundle-linux-x86_64.tgz && \
+	tar -zxvf MiniZincIDE-${minizinc_version}-bundle-linux-x86_64.tgz && \
+	mv MiniZincIDE-${minizinc_version}-bundle-linux-x86_64 MiniZincIDE && \
+	rm -rf MiniZincIDE-${minizinc_version}-bundle-linux-x86_64.tgz
 
 WORKDIR /opt
  
