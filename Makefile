@@ -6,7 +6,7 @@ BUILD ?= `git rev-parse --short HEAD`
 
 
 build_docker: ## Build the Docker image
-	docker build -t $(APP_NAME):latest .
+	docker build --no-cache -t ${USER}/$(APP_NAME):latest .
 
 run_docker: ## Run the app in Docker
-	docker run -p 4000:4000 --rm -it $(APP_NAME):latest
+	docker run -p 4000:4000 --rm -it ${USER}/$(APP_NAME):latest
